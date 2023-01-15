@@ -1,0 +1,59 @@
+Author: WANG_Guanhua <guanhuamail@163.com>
+Date:   Sat Jan 14 17:00:23 2023 +0800
+    搞定了keyframe后处理线程。
+
+commit 963b0fdb5ce4bd040458768f9ef4f52102d6d4ab
+Author: WANG_Guanhua <guanhuamail@163.com>
+Date:   Sat Jan 14 02:28:41 2023 +0800
+    清理了ros层中部分无用文件；优化了wrapper类中代码布局；优化了一些命名。
+
+commit 89ddaf9877b947dd4ccdeda8814702c726ad8e52
+Author: WANG_Guanhua <guanhuamail@163.com>
+Date:   Fri Jan 13 23:53:20 2023 +0800
+    无功能性更新；预留了关键帧后处理线程；整理了目录结构和命名空间；第二批清理文件前的最后一版。
+
+commit 2652980f1af391b15911bf5cdbcac1ca6838f5cf
+Author: WANG_Guanhua <guanhuamail@163.com>
+Date:   Sun Jan 8 20:04:57 2023 +0800
+    A quite good version with all necessary publisher enabled.
+
+commit b52e8fffa2bcac868dffde0a753b8297a6cb388a
+Author: WANG_Guanhua <guanhuamail@163.com>
+Date:   Sun Jan 8 01:42:21 2023 +0800
+    1-完成了CSM核心类中的算法逻辑，相当于LocalTrajBuilder部分；2-初步完成了wrapper中发送数据到rviz的功能；3-解决了wrapper中的死锁问题，一个锁不够用。
+
+commit ba808da4ba5cc6a3f2dbbce4cb0537e34af36cd2
+Author: WANG_Guanhua <guanhuamail@163.com>
+Date:   Sat Jan 7 02:57:06 2023 +0800
+    1-借助虚基类（多态）解决了core中主类与dispatchable交叉包含的问题，现在数据可以完全流通了；2-第一批次清理了core中无用的源码，移除了TrajBuilder/PoseGraph等合计35个文件（见bkp_0107）。
+
+commit ba1f4b99b5b53b4fb4c7a4773d8750d95e956e15
+Author: WANG_Guanhua <guanhuamail@163.com>
+Date:   Fri Jan 6 19:27:35 2023 +0800
+    temp:修改data.h和dispatchable.h前的版本。
+
+commit a538f54a641d12bb85215974b8d8df90bd2e0e82
+Author: WANG_Guanhua <guanhuamail@163.com>
+Date:   Fri Jan 6 17:21:00 2023 +0800
+    ros层的类的结构更合理；完成了主要sensor的回调函数体，ros层到core层的数据传递已跑通。
+
+commit 29d36c9aee445f3e1a2beb4e43df0a7553ec3644
+Author: WANG_Guanhua <guanhuamail@163.com>
+Date:   Fri Jan 6 00:07:16 2023 +0800
+    初步完成了ros_app框架的搭建，搞定了构造加载参数和开启轨迹，编译成功。
+
+commit f04934ce7d562ef4acc2ba4bb64c98c85c899fb5
+Author: WANG_Guanhua <guanhuamail@163.com>
+Date:   Thu Jan 5 01:08:11 2023 +0800
+    完成了core中CSMLidarInertialOdometry的基本版本；开始引入ros_app部分。
+
+commit de03a3ed075fafad23cccab2b66578ce524740f5
+Author: WANG_Guanhua <guanhuamail@163.com>
+Date:   Sat Dec 31 12:16:57 2022 +0800
+    Initial version of CSMLIO, the core part compiled successfully!
+
+commit a3c0674cdf9ecc481b547426a346f3b61b2f155a
+Author: WANG_Guanhua <guanhuamail@163.com>
+Date:   Mon Dec 19 11:44:04 2022 +0800
+    initial commit.
+
