@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 WANG Guanhua (wangguanhua999@gmail.com)
+ * Copyright 2023 WANG Guanhua (wangxxx@gmail.com)
 */
 
 #ifndef CSMLIO_MAPPING_UTILITY_H_

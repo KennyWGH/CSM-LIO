@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 WANG Guanhua (wangguanhua999@gmail.com)
+ * Copyright 2023 WANG Guanhua (wangxxx@gmail.com)
 */
 
 #include <cmath>
@@ -97,6 +97,16 @@ void ConvertSO3ToRPY()
         << so3.eulerAngles(0,1,2) << " \n"
         << "From so3.inv to roll/pitch/yaw: \n" 
         << so3.inverse().eulerAngles(0,1,2);
+
+    Eigen::Vector3i vec3i {3,4,5};
+    LOG(INFO) << "vector3i test: \n" 
+        // << std::fixed << std::setprecision(2) 
+        << vec3i << "\n" << vec3i + Eigen::Vector3i::Ones(); 
+    LOG(INFO) << "vector3i test for vector3f: \n" 
+        // << std::fixed << std::setprecision(2) 
+        << vec3i.cast<float>() << "\n" << vec3i.cast<float>() + 0.7958154f * Eigen::Vector3f::Ones(); 
+    LOG(INFO) << "vector3i test2 for vector3f: \n" 
+        << (vec3i + Eigen::Vector3i::Ones()) * 3 << "\n" << (vec3i + Eigen::Vector3i::Ones()).cast<float>() * 1.111; 
 }
 
 } // namespace
@@ -116,7 +126,7 @@ int main(int argc, char** argv) {
     ::ros::start();
 
     ros_app::ScopedRosLogSink ros_log_sink;
-    // ros_app::ConvertSO3ToRPY();
+    ros_app::ConvertSO3ToRPY();
     ros_app::Run();
     ::ros::shutdown();
     return 0;

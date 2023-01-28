@@ -1,5 +1,9 @@
 # CSM-LIO
 
+Update:
+
+2023-1-28：如果您看到了这里，请注意此仓库当前代码仅为过程版本，功能开发和环境依赖都远未完成，勿测。
+
 ## 1. 简介（Introduction）
 
 具有以下特性：   
@@ -47,6 +51,29 @@
 - 用深拷贝+独立线程来刷新global map。（待定）
 - 用服务响应的方式、用非线性优化的方法、做“lidar2imu”角度外参矫正。（待定）
 - online dynamic removal and mapping, visualize incremental grid map and online dymamic objects removal.
+
+**思路得清晰**
+- 再来捋一下项目初衷：轻量化、便于嵌入、兼容各种雷达feature-free、鲁棒不跑飞、方便做各种验证的LIO。//轻量化包括代码量和运行资源的双轻量化
+- online dynamic remover：独立、轻量化、兼容易用、可视化动态过滤、顺便mapping、可以肉眼验证lio效果的、独立代码包。
+- So, dync remov项目必须独立实现基础设施。
+
+- mapping类维护所有keyframe，每个keyframe用共享指针和成员类共享和共同维护 —— 意味着需要加锁吗？如果要，就是在keyframe结构体内的各个函数接口必须mutex保护；如果确保整个dync remov工程是单线程的话，就无需费功夫了。
+- 刚体变换：pcl的那一套？
+- 兼容多lidar？意味着点云数据结构里需要保留origin坐标，数据预处理里需要查询静态tf。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ## 3. 算法特性（Features）
