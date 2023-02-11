@@ -108,6 +108,11 @@ inline float ValueToCorrespondenceCost(const uint16 value) {
   return (*kValueToCorrespondenceCost)[value];
 }
 
+// 把 value 映射为在区间 [0, 255] 范围内的 intensity。
+inline int ValueToIntensity(const uint16 value) {
+  return value * 255.f / 32767;
+}
+
 inline uint16 ProbabilityValueToCorrespondenceCostValue(
     uint16 probability_value) {
   if (probability_value == kUnknownProbabilityValue) {

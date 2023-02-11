@@ -52,6 +52,16 @@ void PointCloud::push_back(PointCloud::PointType value) {
   points_.push_back(std::move(value));
 }
 
+void PointCloud::push_back(PointCloud::PointType point, const float intensity) {
+  points_.push_back(std::move(point));
+  intensities_.push_back(intensity);
+}
+
+void PointCloud::clear() {
+  points_.clear();
+  intensities_.clear();
+}
+
 PointCloud TransformPointCloud(const PointCloud& point_cloud,
                                const transform::Rigid3f& transform) {
   std::vector<RangefinderPoint> points;

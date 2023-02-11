@@ -28,6 +28,7 @@
 #include "infinityslam/sensor/internal/voxel_filter.h"
 #include "infinityslam/sensor/odometry_data.h"
 #include "infinityslam/sensor/range_data.h"
+#include "infinityslam/sensor/point_cloud.h"
 #include "infinityslam/sensor/timed_point_cloud_data.h"
 #include "infinityslam/sensor/collator_interface.h"
 #include "infinityslam/sensor/internal/collator.h"
@@ -147,6 +148,9 @@ class CSMLidarInertialOdometry : public CSMLioInterface {
     const std::deque<TrajectoryNode>& GetSlamKeyframeList() const;
     const std::deque<utils::TimedPose>& GetTimedPoseQueue() const;
 
+    std::vector<std::shared_ptr<const sensor::PointCloud>> GetActiveSubmapCloudsList();
+    const sensor::PointCloud& GetActiveSubmapCloudsInOne();
+
   private:
     /// 自定义的一些日志函数。
     void LogSensorDataRate(const std::string& sensor_id, const common::Time& data_stamp);
@@ -189,6 +193,10 @@ class CSMLidarInertialOdometry : public CSMLioInterface {
 
     // CSMLIO 核心成员。
     mapping::ActiveSubmaps3D active_submaps_;
+    std::shared_ptr<sensor::PointCloud> submap_cloud_growing_; //最新的
+    std::shared_ptr<sensor::PointCloud> submap_cloud_working_; //此新的
+    std::shared_ptr<sensor::PointCloud> submap_cloud_all_;     //所有的
+    mutable bool active_submaps_updated = false;
 
     mapping::MotionFilter motion_filter_;
     std::unique_ptr<mapping::scan_matching::RealTimeCorrelativeScanMatcher3D>

@@ -242,6 +242,7 @@ class Node {
     // publishers 相关变量。
     ::infinityslam::common::Time last_published_slam_result_time_ 
         = ::infinityslam::common::Time::min();
+    sensor_msgs::PointCloud2 submap_cloud_ros_pc2_;
     sensor_msgs::PointCloud2 global_map_ros_pc2_;
     int last_published_global_map_kf_id_ = -1;
 

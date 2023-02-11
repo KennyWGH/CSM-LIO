@@ -660,15 +660,17 @@ void Node::PublishSlamTrajectory(const ::ros::WallTimerEvent& timer_event) {
     }
 }
 
-/// 发布grid格式的submap？
+/// 发布当前active submaps。
 void Node::PublishSubmapList(const ::ros::WallTimerEvent& timer_event) {
-    /// 如果想要按照期望的方式获取submap实体数据，需要从Submap3D::ToResponseProto()函数
-    /// 开始复现。比较麻烦，我们暂时不考虑这个需求。
-    /// 如果做的话，我们以点云形式表示3Dsubmap即可，点表示cell的中心位置。
+    if (submap_list_publisher_.getNumSubscribers() == 0) return;
+    // if ()
+    std::lock_guard<std::mutex> lock(inner_mutex_);
+    submap_cloud_ros_pc2_ = 
+        FromPointCloudToRosPointCloud2(csm_lio_->GetActiveSubmapCloudsInOne());
+    submap_cloud_ros_pc2_.header.stamp = ros::Time::now();
+    submap_cloud_ros_pc2_.header.frame_id = ros_app::options::map_frame;
+    submap_list_publisher_.publish(submap_cloud_ros_pc2_);
 
-
-    // std::lock_guard<std::mutex> lock(xxx_mutex_);
-    // submap_list_publisher_.publish();
 }
 
 /// 发布点云形式的全局地图

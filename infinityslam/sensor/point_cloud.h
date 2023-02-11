@@ -52,6 +52,9 @@ class PointCloud {
   ConstIterator end() const;
 
   void push_back(PointType value);
+  void push_back(PointType point, const float intensity);
+
+  void clear();
 
   // Creates a PointCloud consisting of all the points for which `predicate`
   // returns true, together with the corresponding intensities.

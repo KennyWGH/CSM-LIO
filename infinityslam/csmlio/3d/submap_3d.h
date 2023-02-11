@@ -26,11 +26,9 @@
 #include "infinityslam/csmlio/3d/hybrid_grid.h"
 #include "infinityslam/csmlio/3d/range_data_inserter_3d.h"
 #include "infinityslam/csmlio/id.h"
-// #include "infinityslam/csmlio/proto/serialization.pb.h"
-// #include "infinityslam/csmlio/proto/submap_visualization.pb.h"
-// #include "infinityslam/csmlio/proto/submaps_options_3d.pb.h"
 #include "infinityslam/csmlio/submaps.h"
 #include "infinityslam/sensor/range_data.h"
+#include "infinityslam/sensor/point_cloud.h"
 #include "infinityslam/transform/rigid_transform.h"
 #include "infinityslam/transform/transform.h"
 
@@ -72,6 +70,11 @@ class Submap3D : public Submap {
     Submap3D(float high_resolution, float low_resolution,
             const transform::Rigid3d& local_submap_pose,
             const Eigen::VectorXf& rotational_scan_matcher_histogram);
+
+    // 外部UI可视化submap的接口
+    bool ToPointCloud(const transform::Rigid3d& global_submap_pose, 
+        const std::shared_ptr<sensor::PointCloud>& point_cloud_,
+        bool from_high_res_submap = true) const;
 
     const HybridGrid& high_resolution_hybrid_grid() const {
         return *high_resolution_hybrid_grid_;

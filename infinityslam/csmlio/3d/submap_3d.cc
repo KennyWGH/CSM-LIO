@@ -18,12 +18,14 @@
 
 #include <cmath>
 #include <limits>
+#include <cassert>
 #include <boost/make_unique.hpp>
 
 #include "infinityslam/common/math.h"
 #include "infinityslam/common/system_options.h"
 #include "infinityslam/csmlio/internal/3d/scan_matching/rotational_scan_matcher.h"
 #include "infinityslam/sensor/range_data.h"
+#include "infinityslam/sensor/point_cloud.h"
 #include "glog/logging.h"
 
 namespace infinityslam {
@@ -76,6 +78,7 @@ std::vector<PixelData> AccumulatePixelData(
   return accumulated_pixel_data;
 }
 
+// 这个函数通过 HybridGrid 类提供的 Iterator 接口来访问所有的cell。
 // The first three entries of each returned value are a cell_index and the
 // last is the corresponding probability value. We batch them together like
 // this to only have one vector and have better cache locality.
@@ -85,8 +88,8 @@ std::vector<Eigen::Array4i> ExtractVoxelData(
   std::vector<Eigen::Array4i> voxel_indices_and_probabilities;
   const float resolution_inverse = 1.f / hybrid_grid.resolution();
 
-  // constexpr float kXrayObstructedCellProbabilityLimit = 0.501f;
-  constexpr float kXrayObstructedCellProbabilityLimit = 0.701f;
+  constexpr float kXrayObstructedCellProbabilityLimit = 0.501f;
+  // constexpr float kXrayObstructedCellProbabilityLimit = 0.701f;
   for (auto it = HybridGrid::Iterator(hybrid_grid); !it.Done(); it.Next()) {
     const uint16 probability_value = it.GetValue();
     const float probability = ValueToProbability(probability_value);
@@ -98,9 +101,9 @@ std::vector<Eigen::Array4i> ExtractVoxelData(
     const Eigen::Vector3f cell_center_submap =
         hybrid_grid.GetCenterOfCell(it.GetCellIndex());
     // wgh: We ignore floor and ceiling cells.(filter out higher and lower heigth.)
-    if (cell_center_submap.z() < 0.5 || 1.5 < cell_center_submap.z()) {
-      continue;
-    }
+    // if (cell_center_submap.z() < 0.5 || 1.5 < cell_center_submap.z()) {
+    //   continue;
+    // }
     const Eigen::Vector3f cell_center_global = transform * cell_center_submap;
     const Eigen::Array4i voxel_index_and_probability(
         common::RoundToInt(cell_center_global.x() * resolution_inverse),
@@ -115,6 +118,35 @@ std::vector<Eigen::Array4i> ExtractVoxelData(
   }
   return voxel_indices_and_probabilities;
 }
+
+// 我们重载了这个函数，用于直接获得 PointCloud 格式的数据。
+bool ExtractVoxelData(
+    const HybridGrid& hybrid_grid, const transform::Rigid3f& transform,
+    const std::shared_ptr<sensor::PointCloud>& point_cloud_) {
+  if (point_cloud_ == nullptr) return false;
+  point_cloud_->clear();
+  std::vector<sensor::RangefinderPoint> points;
+  std::vector<float> intensities;
+  constexpr float kXrayObstructedCellProbabilityLimit = 0.501f;
+  // constexpr float kXrayObstructedCellProbabilityLimit = 0.701f;
+  for (auto it = HybridGrid::Iterator(hybrid_grid); !it.Done(); it.Next()) {
+    const uint16 probability_value = it.GetValue();
+    const float probability = ValueToProbability(probability_value);
+    if (probability < kXrayObstructedCellProbabilityLimit) {
+      // We ignore non-obstructed cells.
+      continue;
+    }
+
+    const Eigen::Vector3f cell_center_submap =
+        hybrid_grid.GetCenterOfCell(it.GetCellIndex());
+    const Eigen::Vector3f cell_center_global = transform * cell_center_submap;
+
+    point_cloud_->push_back(sensor::RangefinderPoint{cell_center_global}, probability);
+    // point_cloud_->push_back(sensor::RangefinderPoint{cell_center_global}, probability_value);
+  }
+  return true;
+}
+
 
 // Builds texture data containing interleaved value and alpha for the
 // visualization from 'accumulated_pixel_data'.
@@ -176,6 +208,24 @@ Submap3D::Submap3D(const float high_resolution, const float low_resolution,
       high_resolution_intensity_hybrid_grid_(
           boost::make_unique<IntensityHybridGrid>(high_resolution)),
       rotational_scan_matcher_histogram_(rotational_scan_matcher_histogram) {}
+
+bool Submap3D::ToPointCloud(const transform::Rigid3d& global_submap_pose, 
+  const std::shared_ptr<sensor::PointCloud>& point_cloud_,
+  bool from_high_res_submap) const {
+  assert(point_cloud_ != nullptr);
+  // 选择把“高/或低”分辨率submap转换为点云做可视化.
+  auto& hybrid_grid = from_high_res_submap 
+    ? *high_resolution_hybrid_grid_
+    : *low_resolution_hybrid_grid_;
+  const float resolution = hybrid_grid.resolution();
+  Eigen::Array2i min_index(INT_MAX, INT_MAX);
+  Eigen::Array2i max_index(INT_MIN, INT_MIN);
+  // const std::vector<Eigen::Array4i> voxel_indices_and_probabilities =
+  //     ExtractVoxelData(hybrid_grid, global_submap_pose.cast<float>(),
+  //                      &min_index, &max_index);
+  return ExtractVoxelData(hybrid_grid, 
+    global_submap_pose.cast<float>(), point_cloud_);
+}
 
 void Submap3D::InsertData(const sensor::RangeData& range_data_in_local,
                           const RangeDataInserter3D& range_data_inserter,
@@ -259,7 +309,9 @@ void ActiveSubmaps3D::AddSubmap(
   const Eigen::VectorXf initial_rotational_scan_matcher_histogram =
       Eigen::VectorXf::Zero(rotational_scan_matcher_histogram_size);
   submaps_.emplace_back(new Submap3D(
-      full_Options_.submap_high_resolution, full_Options_.submap_low_resolution, local_submap_pose,
+      full_Options_.submap_high_resolution, 
+      full_Options_.submap_low_resolution, 
+      local_submap_pose,
       initial_rotational_scan_matcher_histogram));
 }
 

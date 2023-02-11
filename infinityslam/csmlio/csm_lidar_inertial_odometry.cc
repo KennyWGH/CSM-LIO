@@ -80,6 +80,9 @@ CSMLidarInertialOdometry::CSMLidarInertialOdometry(
     , last_logging_time_(std::chrono::steady_clock::now())
     , kPoseQueueDuration(common::FromSeconds(5.0))
 {
+    submap_cloud_growing_.reset(new sensor::PointCloud);
+    submap_cloud_working_.reset(new sensor::PointCloud);
+    submap_cloud_all_.reset(new sensor::PointCloud);
     if (csm_lio_Options_.use_online_correlative_scan_matching) {
         real_time_correlative_scan_matcher_ = 
             mapping::scan_matching::CreateRealTimeCorrelativeScanMatcher3D();
@@ -183,9 +186,9 @@ void CSMLidarInertialOdometry::ProcessSensorData(
                     matching_result->insertion_result->insertion_submaps.begin(),
                     matching_result->insertion_result->insertion_submaps.end())});
         // 保存关键帧信息
+        std::lock_guard<std::mutex> lock(mutex_);
         int node_id = slam_keyframes_data_.empty() ? 0
                         : slam_keyframes_data_.back().node_id + 1;
-        std::lock_guard<std::mutex> lock(mutex_);
         slam_keyframes_data_.push_back(
             TrajectoryNode{
                 node_id, 
@@ -201,6 +204,8 @@ void CSMLidarInertialOdometry::ProcessSensorData(
         {
             timed_pose_queue_.pop_front();
         }
+        // 更新active submaps 更新标志位。(submap点云只在需要时自取)
+        active_submaps_updated = true;
     }
 
     if (lio_result_callback_) {
@@ -291,6 +296,71 @@ CSMLidarInertialOdometry::GetTimedPoseQueue() const
 {
     std::lock_guard<std::mutex> lock(mutex_);
     return timed_pose_queue_;
+}
+
+// 获取当前 active submaps 的点云（各submap间独立输出）。
+// 以点云形式表示3Dsubmap，点表示cell的中心位置。
+// 该函数会在必要时更新submap点云，可以作为更新submap点云的函数被调用。
+std::vector<std::shared_ptr<const sensor::PointCloud>> 
+CSMLidarInertialOdometry::GetActiveSubmapCloudsList() {
+    if (!active_submaps_updated) {
+        return std::vector<std::shared_ptr<const sensor::PointCloud>> {};
+    }
+    std::lock_guard<std::mutex> lock(mutex_);
+    std::vector<std::shared_ptr<const Submap3D>> active_submaps = 
+        active_submaps_.submaps();
+    // 默认前端中只保留两个submap，所以我们也只用两个。
+    if (active_submaps.size() >= 1) {
+        auto& submap_working_ = active_submaps[0];
+        if (submap_working_->ToPointCloud(submap_working_->local_pose(), submap_cloud_working_, false)) {
+            // 无需二合一，把working的submap的点云数据拷贝一下
+            submap_cloud_all_->clear();
+            *submap_cloud_all_ = *submap_cloud_working_;
+            LOG(INFO) << "## Updated submap list cloud: working submap cloud has " 
+                << submap_cloud_working_->size() << " points.";
+            // done.
+            active_submaps_updated = false;
+            return std::vector<std::shared_ptr<const sensor::PointCloud>> {
+                submap_cloud_working_};
+        }
+    }
+    // if (active_submaps.size() >= 2) {
+    //     auto& submap_working_ = active_submaps[0];
+    //     auto& submap_growing_ = active_submaps[1];
+    //     if (submap_working_->ToPointCloud(submap_working_->local_pose(), submap_cloud_working_, false)
+    //         && submap_growing_->ToPointCloud(submap_growing_->local_pose(), submap_cloud_growing_, false)) {
+    //         // 把两个submap的点云二合一
+    //         submap_cloud_all_->clear();
+    //         auto& points1 = submap_cloud_working_->points();
+    //         auto& intensities1 = submap_cloud_working_->intensities();
+    //         if (points1.size() == intensities1.size()) {
+    //             for (size_t i=0; i<points1.size(); ++i) {
+    //                 submap_cloud_all_->push_back(points1[i], intensities1[i]);
+    //             }
+    //         }
+    //         auto& points2 = submap_cloud_growing_->points();
+    //         auto& intensities2 = submap_cloud_growing_->intensities();
+    //         if (points2.size() == intensities2.size()) {
+    //             for (size_t i=0; i<points2.size(); ++i) {
+    //                 submap_cloud_all_->push_back(points2[i], intensities2[i]);
+    //             }
+    //         }
+    //         // done.
+    //         active_submaps_updated = false;
+    //         return std::vector<std::shared_ptr<const sensor::PointCloud>> {
+    //             submap_cloud_working_, submap_cloud_growing_};
+    //     }
+    // }
+    return std::vector<std::shared_ptr<const sensor::PointCloud>> {};
+}
+
+// A版功能：获取当前 active submaps 的点云（各submap的点云叠加输出）
+// B版功能：获取当前 working submap 的点云。
+// （以点云形式表示3Dsubmap，点表示cell的中心位置）
+const sensor::PointCloud& 
+CSMLidarInertialOdometry::GetActiveSubmapCloudsInOne() {
+    GetActiveSubmapCloudsList(); //在有必要时更新点云
+    return *submap_cloud_all_;
 }
 
 void CSMLidarInertialOdometry::LogSensorDataRate(
