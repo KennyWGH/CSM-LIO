@@ -20,21 +20,21 @@
 #include <string>
 
 #include "Eigen/Core"
-#include "csmlio/io/file_writer.h"
-#include "csmlio/io/image.h"
-#include "csmlio/lio/2d/map_limits.h"
+#include "infinityslam/io/file_writer.h"
+#include "infinityslam/io/image.h"
+#include "infinityslam/csmlio/2d/map_limits.h"
 
 namespace ros_app {
 
 // Write 'image' as a pgm into 'file_writer'. The resolution is used in the
 // comment only'
-void WritePgm(const ::csmlio::io::Image& image, const double resolution,
-              ::csmlio::io::FileWriter* file_writer);
+void WritePgm(const ::infinityslam::io::Image& image, const double resolution,
+              ::infinityslam::io::FileWriter* file_writer);
 
 // Write the corresponding yaml into 'file_writer'.
 void WriteYaml(const double resolution, const Eigen::Vector2d& origin,
                const std::string& pgm_filename,
-               ::csmlio::io::FileWriter* file_writer);
+               ::infinityslam::io::FileWriter* file_writer);
 
 }  // namespace ros_app
 

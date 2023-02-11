@@ -109,8 +109,6 @@ TRAJECTORY_BUILDER_3D = {
   -- When setting use_intensites to true, the intensity_cost_function_options_0
   -- parameter in ceres_scan_matcher has to be set up as well or otherwise
   -- CeresScanMatcher will CHECK-fail.
-  -- use_intensities = false,
+  use_intensities = false,
 
-  -- wgh: 设置为true，以便intensity作为ground label被启用。
-  use_intensities = true,
 }

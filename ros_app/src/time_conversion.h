@@ -6,14 +6,14 @@
 #ifndef ROS_APP_TIME_CONVERSION_H
 #define ROS_APP_TIME_CONVERSION_H
 
-#include "csmlio/common/time.h"
+#include "infinityslam/common/time.h"
 #include "ros/ros.h"
 
 namespace ros_app {
 
-::ros::Time ToRos(::csmlio::common::Time time);
+::ros::Time ToRos(::infinityslam::common::Time time);
 
-::csmlio::common::Time FromRos(const ::ros::Time& time);
+::infinityslam::common::Time FromRos(const ::ros::Time& time);
 
 }  // namespace ros_app
 

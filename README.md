@@ -24,14 +24,14 @@ Update:
 > 不再区分traj_id的概念，仅区分sensor_id即可；  
 > 不再考虑续扫，保留原有接口但函数体为空；
 
-**cartographer_ros 的参数文件解析系统（.lua）**
-- 整个文件解析系统都实现在 *`lua_parameter_dictionary.h/cc`、`configuration_file_resolver.h/cc`* 两个文件中，这两个文件属于 `cartographer工程`，它们定义的类/函数/对象/等都位于 `cartograph-er::common` 命名空间；
-- 第一个类名字叫做 **ConfigurationFileResolver**，专门负责从特定路径下搜索各个lua文件，确认lua文件存在；
+**cartographer_ros 的参数加载系统（.lua）**
+- 整个参数加载系统都实现在 *`lua_parameter_dictionary.h/cc`、`configuration_file_resolver.h/cc`* 两个文件中，这两个文件属于 `cartographer工程`，其中定义的“类/函数/对象/等”都位于 `cartographer::common` 命名空间；
+- 第一个起作用的类是 **ConfigurationFileResolver** —— 专门负责从特定路径下搜索各个lua文件，确认lua文件存在；
 - 搜索路径有两个来源，一个是main函数中给定的路径（来自launch文件，通过构造函数传参给类对象），另一个是编译过程中自动记录下的程序安装路径（路径变量位于cofig.h），这两者正常情况下是相同的；
 - 类成员函数 ConfigurationFileResolver::**GetFullPathOrDie()** 负责确认给定名字的lua文件存在，并返回lua文件的绝对路径，如`/home/.../install_isolated/.../wgh_backpack_3d.lua`；
 - 类成员函数 ConfigurationFileResolver::**GetFileContentOrDie()** 负责通过`std::ifstream`把lua文件中的文本内容全部加载到一个`std::string对象`中，并返回，后续会有lua脚本语言专门从字符串中解析出所有参数！至此，ConfigurationFileResolver类的使命就完成了。
 - 接下来，轮到另一个类登场了 —— **class LuaParameterDictionary**，专门负责（通过lua脚本语言？）从`std::string对象`内解析出所有参数；由于在构造时引入了 ConfigurationFileResolver对象，该类还支持解析嵌套的lua文件 —— 也即被当前lua文件通过`include "wgh_map_builder.lua"`的方式包含的其它lua文件；具体的实现较为复杂，应该是跟lua脚本语言语法有关，这里不再深入研究，知道如何使用即可。
-- 解析出来的所有必要参数，最终是以 **struct Node-Options**、**struct Trajectory-Options** 结构体的方式给到下游代码去使用的，这又涉及到了另外两个源文件 —— *`node_options.h/cc`、`trajectory_options.h/cc`*，这两个文件都属于 `cartographer_ros工程`，但是，结构体内部嵌套（以及多重嵌套）的结构体 —— 如 *class ::cartograph-er::mapping::proto::**MapBuilder-Options***、*class ::cartograph-er::mapping::proto::**TrajectoryBuilder-Options*** 等，则对应性地属于`cartographer工程`，它们都是由 *`.proto`* 脚本文件导出的class。
+- 解析出来的所有必要参数，最终是以 **struct Node-Options**、**struct Trajectory-Options** 结构体的方式给到下游代码去使用的，这又涉及到了另外两个源文件 —— *`node_options.h/cc`、`trajectory_options.h/cc`*，这两个文件都属于 `cartographer_ros工程`，但是，结构体内部嵌套（以及多重嵌套）的结构体 —— 如 *class ::cartographer::mapping::proto::**MapBuilder-Options***、*class ::cartographer::mapping::proto::**TrajectoryBuilder-Options*** 等，则对应性地属于`cartographer工程`，它们都是由 *`.proto`* 脚本文件导出的class。
 > 所有 *`.proto`* 脚本文件导出的部分，都用C++普通结构体替代。
 
 **CSM-LIO架构设计**
@@ -51,6 +51,7 @@ Update:
 - 用深拷贝+独立线程来刷新global map。（待定）
 - 用服务响应的方式、用非线性优化的方法、做“lidar2imu”角度外参矫正。（待定）
 - online dynamic removal and mapping, visualize incremental grid map and online dymamic objects removal.
+- 现在mapping命名空间动不了，我们精简之后，尤其是把参数加载系统替换之后，再修改mapping命名空间。
 
 **思路得清晰**
 - 再来捋一下项目初衷：轻量化、便于嵌入、兼容各种雷达feature-free、鲁棒不跑飞、方便做各种验证的LIO。//轻量化包括代码量和运行资源的双轻量化
@@ -60,16 +61,6 @@ Update:
 - mapping类维护所有keyframe，每个keyframe用共享指针和成员类共享和共同维护 —— 意味着需要加锁吗？如果要，就是在keyframe结构体内的各个函数接口必须mutex保护；如果确保整个dync remov工程是单线程的话，就无需费功夫了。
 - 刚体变换：pcl的那一套？
 - 兼容多lidar？意味着点云数据结构里需要保留origin坐标，数据预处理里需要查询静态tf。
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -94,6 +85,7 @@ Update:
 
 ## 4. 编译与运行（Compile and Run）
 依赖，依赖`XXX`。  
+- yaml-cpp（ubuntu默认自带，若无请手动安装 [[link](https://github.com/jbeder/yaml-cpp)] ）
 
 编译。  
 > cd XX  

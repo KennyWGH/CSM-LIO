@@ -20,8 +20,8 @@
 
 namespace ros_app {
 
-void WritePgm(const ::csmlio::io::Image& image, const double resolution,
-              ::csmlio::io::FileWriter* file_writer) {
+void WritePgm(const ::infinityslam::io::Image& image, const double resolution,
+              ::infinityslam::io::FileWriter* file_writer) {
   const std::string header =
       absl::StrCat("P5\n# Cartographer map; ", resolution, " m/pixel\n",
                    image.width(), " ", image.height(), "\n255\n");
@@ -36,7 +36,7 @@ void WritePgm(const ::csmlio::io::Image& image, const double resolution,
 
 void WriteYaml(const double resolution, const Eigen::Vector2d& origin,
                const std::string& pgm_filename,
-               ::csmlio::io::FileWriter* file_writer) {
+               ::infinityslam::io::FileWriter* file_writer) {
   // Magic constants taken directly from ros map_saver code:
   // https://github.com/ros-planning/navigation/blob/ac41d2480c4cf1602daf39a6e9629142731d92b0/map_server/src/map_saver.cpp#L114
   const std::string output = absl::StrCat(

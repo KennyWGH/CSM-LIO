@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 WANG Guanhua (wangxxx@gmail.com)
+ * Copyright 2022 WANG Guanhua (wangxxx@gmail.com)
 */
 
 #include <cmath>
@@ -34,24 +34,17 @@
 #include <pcl_conversions/pcl_conversions.h>
 
 #include "ros_app/src/node_constants.h"
-#include "ros_app/src/trajectory_options.h"
-#include "ros_app/src/node_options.h"
-#include "ros_app/src/ros_log_sink.h"
 #include "ros_app/src/ros_wrapper.h"
+#include "ros_app/src/ros_wrapper_options.h"
+#include "ros_app/src/ros_log_sink.h"
 
-#include "absl/memory/memory.h"
-#include "csmlio/lio/csm_lidar_inertial_odometry.h"
+#include "infinityslam/csmlio/csm_lidar_inertial_odometry.h"
 
 
-DEFINE_string(configuration_directory, "",
-              "The directory in which configuration files are searched.");
-DEFINE_string(configuration_basename, "",
-              "Basename, i.e. not containing any directory prefix, of the "
-              "configuration file.");
-DEFINE_bool(
-    start_trajectory_with_default_topics, true,
-    "Enable to immediately start the first trajectory with default topics.");
-
+DEFINE_string(ros_config_file, "./src/CSM-LIO/config/ros_config_file.yaml", 
+    "The configuration file from which ros-wrapper options are loaded.");
+DEFINE_string(slam_config_file, "./src/CSM-LIO/config/slam_config_file.yaml", 
+    "The configuration file from which slam options are loaded.");
 
 namespace ros_app {
 namespace {
@@ -61,13 +54,12 @@ void Run()
     constexpr double kTfBufferCacheTimeInSeconds = 10.;
     tf2_ros::Buffer tf_buffer{::ros::Duration(kTfBufferCacheTimeInSeconds)};
     tf2_ros::TransformListener tf(tf_buffer);
-    NodeOptions node_options;
-    TrajectoryOptions trajectory_options;
-    std::tie(node_options, trajectory_options) =
-        LoadOptions(FLAGS_configuration_directory, FLAGS_configuration_basename);
 
-    Node node(node_options, trajectory_options, &tf_buffer);
-    node.node_handle()->getNamespace();
+    // LoadRosWrapperOptions(FLAGS_ros_config_file, /*logging=*/true); // TODO: debug yaml reading error.
+    RosWrapperOptions ros_wrapper_options = ReadRosWrapperOptions();
+
+    Node node(ros_wrapper_options, &tf_buffer);
+
     LOG(INFO) << "## Report ros::NodeHandle::getNamespace(): " 
         << node.node_handle()->getNamespace() << " .";
     node.Start();
@@ -80,13 +72,11 @@ void Run()
 
 }
 
-void ConvertSO3ToRPY()
-{
-//    data: [ 2.67949e-08, -1,  0, 0,
-//            1,  2.67949e-08,  0, 0,
-//            0,  0,  1, -0.28, 
-//            0., 0., 0., 1 ] 
-
+void ConvertSO3ToRPY() {
+    // data: [ 2.67949e-08, -1,  0, 0,
+    //         1,  2.67949e-08,  0, 0,
+    //         0,  0,  1, -0.28, 
+    //         0., 0., 0., 1 ] 
 
     Eigen::Matrix3d so3;
     so3(0,0) = 2.67949e-08; so3(0,1) = -1;          so3(0,2) = 0;
@@ -96,7 +86,9 @@ void ConvertSO3ToRPY()
         << "From so3 to roll/pitch/yaw: \n" 
         << so3.eulerAngles(0,1,2) << " \n"
         << "From so3.inv to roll/pitch/yaw: \n" 
-        << so3.inverse().eulerAngles(0,1,2);
+        << so3.inverse().eulerAngles(0,1,2)
+        << "From so3.inv to roll/pitch/yaw (transpose): " 
+        << so3.inverse().eulerAngles(0,1,2).transpose();
 
     Eigen::Vector3i vec3i {3,4,5};
     LOG(INFO) << "vector3i test: \n" 
@@ -117,16 +109,16 @@ int main(int argc, char** argv) {
     google::InitGoogleLogging(argv[0]);
     google::ParseCommandLineFlags(&argc, &argv, true);
 
-    CHECK(!FLAGS_configuration_directory.empty())
-        << "-configuration_directory is missing.";
-    CHECK(!FLAGS_configuration_basename.empty())
-        << "-configuration_basename is missing.";
+    CHECK(!FLAGS_ros_config_file.empty())
+        << "-ros_config_file is missing.";
+    CHECK(!FLAGS_slam_config_file.empty())
+        << "-slam_config_file is missing.";
 
     ::ros::init(argc, argv, "csm_lio_ros_app");
     ::ros::start();
 
     ros_app::ScopedRosLogSink ros_log_sink;
-    ros_app::ConvertSO3ToRPY();
+    // ros_app::ConvertSO3ToRPY();
     ros_app::Run();
     ::ros::shutdown();
     return 0;

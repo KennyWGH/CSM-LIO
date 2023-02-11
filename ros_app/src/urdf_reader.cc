@@ -44,7 +44,7 @@ std::vector<geometry_msgs::TransformStamped> ReadStaticTransformsFromUrdf(
         link->parent_joint->parent_to_joint_origin_transform;
     geometry_msgs::TransformStamped transform;
     transform.transform =
-        ToGeometryMsgTransform(csmlio::transform::Rigid3d(
+        ToGeometryMsgTransform(infinityslam::transform::Rigid3d(
             Eigen::Vector3d(pose.position.x, pose.position.y, pose.position.z),
             Eigen::Quaterniond(pose.rotation.w, pose.rotation.x,
                                pose.rotation.y, pose.rotation.z)));

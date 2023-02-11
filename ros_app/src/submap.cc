@@ -17,16 +17,17 @@
 #include "ros_app/src/submap.h"
 
 #include "absl/memory/memory.h"
-#include "csmlio/common/port.h"
-#include "csmlio/transform/transform.h"
+#include <boost/make_unique.hpp>
+#include "infinityslam/common/port.h"
+#include "infinityslam/transform/transform.h"
 #include "ros_app/src/msg_conversion.h"
 #include "ros_app/msgs/StatusCode.h"
 #include "ros_app/msgs/SubmapQuery.h"
 
 namespace ros_app {
 
-std::unique_ptr<::csmlio::io::SubmapTextures> FetchSubmapTextures(
-    const ::csmlio::mapping::SubmapId& submap_id,
+std::unique_ptr<::infinityslam::io::SubmapTextures> FetchSubmapTextures(
+    const ::infinityslam::mapping::SubmapId& submap_id,
     ros::ServiceClient* client) 
 {
   // wgh: 创建请求消息，得到的信息实体就存放在 <srv.response.textures> 中。
@@ -40,7 +41,7 @@ std::unique_ptr<::csmlio::io::SubmapTextures> FetchSubmapTextures(
   if (srv.response.textures.empty()) {
     return nullptr;
   }
-  auto response = absl::make_unique<::csmlio::io::SubmapTextures>();
+  auto response = boost::make_unique<::infinityslam::io::SubmapTextures>();
   response->version = srv.response.submap_version;
   // wgh: 逐一读取信息实体（该submap_id下，不同分辨率的submap）。
   for (const auto& texture : srv.response.textures) {
@@ -48,8 +49,8 @@ std::unique_ptr<::csmlio::io::SubmapTextures> FetchSubmapTextures(
     const std::string compressed_cells(texture.cells.begin(),
                                        texture.cells.end());
     // wgh: 创建可读信息实体的地方。
-    response->textures.emplace_back(::csmlio::io::SubmapTexture{
-        ::csmlio::io::UnpackTextureData(compressed_cells, texture.width,
+    response->textures.emplace_back(::infinityslam::io::SubmapTexture{
+        ::infinityslam::io::UnpackTextureData(compressed_cells, texture.width,
                                               texture.height),
         texture.width, texture.height, texture.resolution,
         ToRigid3d(texture.slice_pose)});

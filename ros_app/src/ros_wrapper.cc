@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 WANG Guanhua (wangxxx@gmail.com)
+ * Copyright 2022 WANG Guanhua (wangxxx@gmail.com)
  * Copyright 2016 The Cartographer Authors
  * Licensed under the Apache License, Version 2.0 (the "License").
 */
@@ -19,25 +19,23 @@
 #include "tf2_eigen/tf2_eigen.h"
 #include "visualization_msgs/MarkerArray.h"
 
-#include "csmlio/common/port.h"
-#include "csmlio/common/time.h"
-#include "csmlio/common/configuration_file_resolver.h"
-#include "csmlio/common/lua_parameter_dictionary.h"
-#include "csmlio/lio/pose_graph_interface.h"
-#include "csmlio/lio/proto/submap_visualization.pb.h"
-#include "csmlio/sensor/point_cloud.h"
-#include "csmlio/sensor/odometry_data.h"
-#include "csmlio/sensor/imu_data.h"
-#include "csmlio/sensor/internal/voxel_filter.h"
-#include "csmlio/transform/rigid_transform.h"
-#include "csmlio/transform/transform.h"
+#include "infinityslam/common/port.h"
+#include "infinityslam/common/time.h"
+#include "infinityslam/sensor/point_cloud.h"
+#include "infinityslam/sensor/odometry_data.h"
+#include "infinityslam/sensor/imu_data.h"
+#include "infinityslam/sensor/internal/voxel_filter.h"
+#include "infinityslam/transform/rigid_transform.h"
+#include "infinityslam/transform/transform.h"
+
 #include "ros_app/src/msg_conversion.h"
 #include "ros_app/src/time_conversion.h"
+#include "ros_app/src/ros_wrapper_options.h"
 #include "ros_app/src/ros_wrapper.h"
 
 namespace ros_app {
 
-using ::csmlio::transform::Rigid3d;
+using ::infinityslam::transform::Rigid3d;
 
 namespace {
 
@@ -58,62 +56,62 @@ template <typename MessageType>
             {(node->*handler)(topic, msg);})/*lambda表达式封装为函数对象，作为话题回调*/ );
 }
 
-// 将::csmlio::sensor::PointCloud转化为含intensity的ROS/PointCloud2格式
+// 将::infinityslam::sensor::PointCloud转化为含intensity的ROS/PointCloud2格式
 sensor_msgs::PointCloud2 FromPointCloudToRosPointCloud2 (
-  const ::csmlio::sensor::PointCloud& point_cloud)
+    const ::infinityslam::sensor::PointCloud& point_cloud)
 {
-  uint32_t num_points = point_cloud.size();
-  sensor_msgs::PointCloud2 msg;
-  msg.height = 1;
-  msg.width = num_points;
-  msg.fields.resize(4);
-  msg.fields[0].name = "x";
-  msg.fields[0].offset = 0;
-  msg.fields[0].datatype = sensor_msgs::PointField::FLOAT32;
-  msg.fields[0].count = 1;
-  msg.fields[1].name = "y";
-  msg.fields[1].offset = 4;
-  msg.fields[1].datatype = sensor_msgs::PointField::FLOAT32;
-  msg.fields[1].count = 1;
-  msg.fields[2].name = "z";
-  msg.fields[2].offset = 8;
-  msg.fields[2].datatype = sensor_msgs::PointField::FLOAT32;
-  msg.fields[2].count = 1;
-  msg.fields[3].name = "intensity";
-  msg.fields[3].offset = 12;
-  msg.fields[3].datatype = sensor_msgs::PointField::FLOAT32;
-  msg.fields[3].count = 1;
-  msg.is_bigendian = false;
-  msg.point_step = 16;
-  msg.row_step = 16 * msg.width;
-  msg.is_dense = true;
-  msg.data.resize(16 * num_points);
+    uint32_t num_points = point_cloud.size();
+    sensor_msgs::PointCloud2 msg;
+    msg.height = 1;
+    msg.width = num_points;
+    msg.fields.resize(4);
+    msg.fields[0].name = "x";
+    msg.fields[0].offset = 0;
+    msg.fields[0].datatype = sensor_msgs::PointField::FLOAT32;
+    msg.fields[0].count = 1;
+    msg.fields[1].name = "y";
+    msg.fields[1].offset = 4;
+    msg.fields[1].datatype = sensor_msgs::PointField::FLOAT32;
+    msg.fields[1].count = 1;
+    msg.fields[2].name = "z";
+    msg.fields[2].offset = 8;
+    msg.fields[2].datatype = sensor_msgs::PointField::FLOAT32;
+    msg.fields[2].count = 1;
+    msg.fields[3].name = "intensity";
+    msg.fields[3].offset = 12;
+    msg.fields[3].datatype = sensor_msgs::PointField::FLOAT32;
+    msg.fields[3].count = 1;
+    msg.is_bigendian = false;
+    msg.point_step = 16;
+    msg.row_step = 16 * msg.width;
+    msg.is_dense = true;
+    msg.data.resize(16 * num_points);
 
-  ::ros::serialization::OStream stream(msg.data.data(), msg.data.size());
-  const auto& cloud_data = point_cloud.points();
-  const auto& intensities_data = point_cloud.intensities();
-  if (intensities_data.size() != cloud_data.size()) {
-    for (std::size_t i=0; i<cloud_data.size(); ++i) {
-      stream.next(cloud_data[i].position.x());
-      stream.next(cloud_data[i].position.y());
-      stream.next(cloud_data[i].position.z());
-      stream.next(0);
+    ::ros::serialization::OStream stream(msg.data.data(), msg.data.size());
+    const auto& cloud_data = point_cloud.points();
+    const auto& intensities_data = point_cloud.intensities();
+    if (intensities_data.size() != cloud_data.size()) {
+        for (std::size_t i=0; i<cloud_data.size(); ++i) {
+        stream.next(cloud_data[i].position.x());
+        stream.next(cloud_data[i].position.y());
+        stream.next(cloud_data[i].position.z());
+        stream.next(0);
+        }
+        // LOG(WARNING) << "## Found no intensities when converting to "
+        //     "ros pc2, set to 0 by default.";
+        return msg;
     }
-    LOG(WARNING) << "## Found no intensities when converting "
-        "point cloud, set to 0 by default.";
+    for (std::size_t i=0; i<cloud_data.size(); ++i) {
+        stream.next(cloud_data[i].position.x());
+        stream.next(cloud_data[i].position.y());
+        stream.next(cloud_data[i].position.z());
+        stream.next(intensities_data[i]);
+    }
     return msg;
-  }
-  for (std::size_t i=0; i<cloud_data.size(); ++i) {
-    stream.next(cloud_data[i].position.x());
-    stream.next(cloud_data[i].position.y());
-    stream.next(cloud_data[i].position.z());
-    stream.next(intensities_data[i]);
-  }
-  return msg;
 }
 
 std::string mutable_frame_id_; // used by the below function.
-std::unordered_map<std::string, bool> warned_table;
+std::unordered_map<std::string, bool> frame_id_warning_table;
 const std::string& CheckNoLeadingSlash(const std::string& frame_id) {
     if (frame_id.size() > 0) {
         // CHECK_NE(frame_id[0], '/') << "The frame_id " << frame_id
@@ -122,13 +120,13 @@ const std::string& CheckNoLeadingSlash(const std::string& frame_id) {
         if (frame_id[0] == '/') {
             mutable_frame_id_ = frame_id;
             mutable_frame_id_.erase(0,1);
-            if (warned_table.find(frame_id) == warned_table.end()) {
+            if (frame_id_warning_table.find(frame_id) == frame_id_warning_table.end()) {
                 LOG(WARNING) << "## The frame_id " << frame_id
                     << " should not start with a /. See 1.7 in "
                                         "http://wiki.ros.org/tf2/Migration.";
                 LOG(WARNING) << "## Now try to use non-slash verion " << mutable_frame_id_
                     << ", if still don't working, please reconsider your configuration.";
-                warned_table[frame_id] = true;
+                frame_id_warning_table[frame_id] = true;
             }
             return mutable_frame_id_;
         }
@@ -138,34 +136,37 @@ const std::string& CheckNoLeadingSlash(const std::string& frame_id) {
 
 }  // namespace
 
+RosWrapperOptions ReadRosWrapperOptions() {
+    RosWrapperOptions roswrapperoPtions;
+    // TODO: 加载参数
+    return roswrapperoPtions;
+}
+
 /// 构造函数：保存options等，构造TfBridge、CSMLIO，注册所有Publisher和Timer回调。
 Node::Node(
-    const NodeOptions& node_options,
-    const TrajectoryOptions& traj_options,
+    const RosWrapperOptions& ros_options,
     tf2_ros::Buffer* const tf_buffer)
-    : node_options_(node_options)
-    , trajectory_options_(traj_options)
+    : ros_wrapper_Options_(ros_options)
     , tf_buffer_(tf_buffer)
 {
-    std::lock_guard<std::mutex> lock(inward_mutex_);
+    std::lock_guard<std::mutex> lock(inner_mutex_);
 
     // 构造静态tf查询工具，该工具用于查询所有sensor坐标系到tracking坐标系的tf。
     tf_bridge_ = boost::make_unique<TfBridge>(
-        trajectory_options_.tracking_frame,
-        node_options_.lookup_transform_timeout_sec,
+        ros_wrapper_Options_.tracking_frame,
+        ros_app::options::lookup_transform_timeout_sec,
         tf_buffer_);
 
     // 构造CSMLidarInertialOdometry对象。
-    expected_sensor_ids_ = ComputeExpectedSensorIds(trajectory_options_);
-    csm_lio_ = boost::make_unique<csmlio::mapping::CSMLidarInertialOdometry>(
-        node_options_.map_builder_options,
-        trajectory_options_.trajectory_builder_options,
+    expected_sensor_ids_ = ComputeExpectedSensorIds(ros_wrapper_Options_);
+    csm_lio_ = boost::make_unique<infinityslam::mapping::CSMLidarInertialOdometry>(
+        infinityslam::mapping::ReadCSMLioOptions(),
         expected_sensor_ids_,
-        [this](const ::csmlio::common::Time time,
+        [this](const ::infinityslam::common::Time time,
             const Rigid3d local_pose,
-            ::csmlio::sensor::RangeData range_data_in_local,
-            std::shared_ptr<::csmlio::sensor::PointCloud> point_cloud,
-            std::unique_ptr<const ::csmlio::mapping::InsertionResult> result) {
+            ::infinityslam::sensor::RangeData range_data_in_local,
+            std::shared_ptr<::infinityslam::sensor::PointCloud> point_cloud,
+            std::unique_ptr<const ::infinityslam::mapping::InsertionResult> result) {
                 OnLioResult(
                     time, 
                     local_pose, 
@@ -173,9 +174,9 @@ Node::Node(
                     point_cloud, 
                     std::move(result));});
 
-    // submap_list_publisher_ =
-    //     node_handle_.advertise<::cartographer_ros_msgs::SubmapList>(
-    //         kSubmapListTopic, kLatestOnlyPublisherQueueSize);
+    submap_list_publisher_ =
+        node_handle_.advertise<sensor_msgs::PointCloud2>(
+            kSubmapListTopic, kLatestOnlyPublisherQueueSize);
     trajectory_node_list_publisher_ =
         node_handle_.advertise<::visualization_msgs::MarkerArray>(
             kTrajectoryNodeListTopic, kLatestOnlyPublisherQueueSize);
@@ -185,7 +186,7 @@ Node::Node(
     constraint_list_publisher_ =
         node_handle_.advertise<::visualization_msgs::MarkerArray>(
             kConstraintListTopic, kLatestOnlyPublisherQueueSize);
-    if (node_options_.publish_tracked_pose) {
+    if (ros_app::options::publish_tracked_pose) {
         tracked_pose_publisher_ =
             node_handle_.advertise<::geometry_msgs::PoseStamped>(
                 kTrackedPoseTopic, kLatestOnlyPublisherQueueSize);
@@ -195,12 +196,6 @@ Node::Node(
             kScanMatchedPointCloudTopic, kLatestOnlyPublisherQueueSize);
 
     // 新增发布（自定义）。
-    slam_local_ground_map_publisher_ =
-        node_handle_.advertise<sensor_msgs::PointCloud2>(
-            "slam_local_ground_map", kLatestOnlyPublisherQueueSize);
-    slam_ground_labelled_pc_publisher_ =
-        node_handle_.advertise<sensor_msgs::PointCloud2>(
-            "slam_ground_labelled_pc", kLatestOnlyPublisherQueueSize);
     slam_global_map_publisher_ =
         node_handle_.advertise<sensor_msgs::PointCloud2>(
             "slam_global_map", kLatestOnlyPublisherQueueSize);
@@ -222,23 +217,23 @@ Node::Node(
 
     // 定时器回调。
     double pose_publish_period_sec = 
-        node_options_.pose_publish_period_sec > 0 
-        ? node_options_.pose_publish_period_sec : 0.05;
+        ros_app::options::pose_publish_period_sec > 0 
+        ? ros_app::options::pose_publish_period_sec : 0.05;
     publish_slam_result_timer_ = node_handle_.createTimer(
         ::ros::Duration(pose_publish_period_sec),
         &Node::PublishSlamResultData, this);
     wall_timers_.push_back(node_handle_.createWallTimer(
-        ::ros::WallDuration(node_options_.submap_publish_period_sec),
+        ::ros::WallDuration(ros_app::options::submap_publish_period_sec),
         &Node::PublishSubmapList, this));
     wall_timers_.push_back(node_handle_.createWallTimer(
-        ::ros::WallDuration(node_options_.trajectory_publish_period_sec),
+        ::ros::WallDuration(ros_app::options::trajectory_publish_period_sec),
         &Node::PublishSlamTrajectory, this));
     wall_timers_.push_back(node_handle_.createWallTimer(
         ::ros::WallDuration(5.0), //地图更新频率无需很高。
         &Node::PublishGlobalMapPC, this));
     trigger_postproc_timer_ = node_handle_.createTimer(
         ::ros::Duration(pose_publish_period_sec),
-        &Node::TriggerPostprocOnce, this);
+        &Node::TriggerPostProcOnce, this);
 
 }
 
@@ -255,12 +250,11 @@ Node::~Node() {
 /// 启动话题订阅，启动SLAM/或LIO。
 bool Node::Start()
 {
-    std::lock_guard<std::mutex> lock(inward_mutex_);
-    CHECK(ValidateLioOptions(trajectory_options_));
+    std::lock_guard<std::mutex> lock(inner_mutex_);
 
     // 常规开启流程。
-    AddSensorSamplers(trajectory_options_);
-    LaunchSubscribers(trajectory_options_);
+    AddSensorSamplers(ros_wrapper_Options_);
+    LaunchSubscribers(ros_wrapper_Options_);
     wall_timers_.push_back(node_handle_.createWallTimer(
         ::ros::WallDuration(kTopicMismatchCheckDelaySec),
         &Node::MaybeWarnAboutTopicMismatch, this, /*oneshot=*/true));
@@ -270,7 +264,7 @@ bool Node::Start()
     LOG(INFO) << "## Started SLAM/LIO.";
 
     // TODO：启动去畸变线程。
-    postproc_thread_ = std::thread(&Node::PerformPostprocKfLoop,this);
+    postproc_thread_ = std::thread(&Node::PerformPostProcKfLoop,this);
     LOG(INFO) << "## Started post-processing loop.";
 
     return true;
@@ -283,7 +277,7 @@ void Node::HandleImuMessage(
     // LOG(INFO) << "## Received IMU msg with frame_id (" 
     //     << msg->header.frame_id << "), stamp (" << msg->header.stamp << ").";
 
-    std::lock_guard<std::mutex> lock(inward_mutex_);
+    std::lock_guard<std::mutex> lock(inner_mutex_);
     if (!sensor_samplers_->imu_sampler.Pulse()) {
         return;
     }
@@ -298,13 +292,13 @@ void Node::HandleImuMessage(
             "requires this data to work. See "
             "http://docs.ros.org/api/sensor_msgs/html/msg/Imu.html.";
 
-    const ::csmlio::common::Time time = FromRos(msg->header.stamp);
+    const ::infinityslam::common::Time time = FromRos(msg->header.stamp);
     const auto sensor_to_tracking = tf_bridge_->LookupToTracking(
         time, CheckNoLeadingSlash(msg->header.frame_id));
     if (sensor_to_tracking == nullptr) {
         LOG(ERROR) << "## ERROR! Found no static tf between sensor frame (" 
             << CheckNoLeadingSlash(msg->header.frame_id) << ") and tracking frame (" 
-            << trajectory_options_.tracking_frame << ").";
+            << ros_wrapper_Options_.tracking_frame << ").";
         return;
     }
     CHECK(sensor_to_tracking->translation().norm() < 1e-5)
@@ -316,11 +310,11 @@ void Node::HandleImuMessage(
     {
         std::unique_lock<std::mutex> lock(postproc_mutex_);
         imu_queue_.push_back(
-            ::csmlio::sensor::ImuData{time, 
+            ::infinityslam::sensor::ImuData{time, 
                 sensor_to_tracking->rotation() * ToEigen(msg->linear_acceleration),
                 sensor_to_tracking->rotation() * ToEigen(msg->angular_velocity)});
         while (imu_queue_.size() > 10 && 
-            ::csmlio::common::ToSeconds(imu_queue_.back().time - imu_queue_.front().time) 
+            ::infinityslam::common::ToSeconds(imu_queue_.back().time - imu_queue_.front().time) 
                 > kDataCacheMaxTimeToKeep)
         {
             imu_queue_.pop_front();
@@ -329,7 +323,7 @@ void Node::HandleImuMessage(
 
     csm_lio_->AddSensorData(
         sensor_id, 
-        ::csmlio::sensor::ImuData{time, 
+        ::infinityslam::sensor::ImuData{time, 
             sensor_to_tracking->rotation() * ToEigen(msg->linear_acceleration),
             sensor_to_tracking->rotation() * ToEigen(msg->angular_velocity)});
     return;
@@ -339,22 +333,22 @@ void Node::HandleOdometryMessage(
     const std::string& sensor_id,
     const nav_msgs::Odometry::ConstPtr& msg) 
 {
-    std::lock_guard<std::mutex> lock(inward_mutex_);
+    std::lock_guard<std::mutex> lock(inner_mutex_);
     LOG(INFO) << "## Received odometry msg with frame_id (" 
         << msg->header.frame_id << "), stamp (" << msg->header.stamp << ").";
     if (!sensor_samplers_->odometry_sampler.Pulse()) { return; }
-    const ::csmlio::common::Time time = FromRos(msg->header.stamp);
+    const ::infinityslam::common::Time time = FromRos(msg->header.stamp);
     const auto sensor_to_tracking = tf_bridge_->LookupToTracking(
         time, CheckNoLeadingSlash(msg->child_frame_id));
     if (sensor_to_tracking == nullptr) {
         LOG(ERROR) << "## ERROR! Found no static tf between sensor frame (" 
             << CheckNoLeadingSlash(msg->child_frame_id) << ") and tracking frame (" 
-            << trajectory_options_.tracking_frame << ").";
+            << ros_wrapper_Options_.tracking_frame << ").";
         return;
     }
     // 当前我们未启用轮速里程计。
     // csm_lio_->AddSensorData(sensor_id, 
-    //     ::csmlio::sensor::OdometryData{
+    //     ::infinityslam::sensor::OdometryData{
     //         time, ToRigid3d(msg->pose.pose) * sensor_to_tracking->inverse()});
     LOG(ERROR) << "## Odometry sensor not enabled.";
 
@@ -367,12 +361,12 @@ void Node::HandlePointCloud2Message(
     // LOG(INFO) << "## Received point cloud msg with frame_id (" 
     //     << msg->header.frame_id << "), stamp (" << msg->header.stamp << ").";
 
-    std::lock_guard<std::mutex> lock(inward_mutex_);
+    std::lock_guard<std::mutex> lock(inner_mutex_);
     if (!sensor_samplers_->rangefinder_sampler.Pulse()) {
         return;
     }
-    ::csmlio::sensor::PointCloudWithIntensities point_cloud;
-    ::csmlio::common::Time time;
+    ::infinityslam::sensor::PointCloudWithIntensities point_cloud;
+    ::infinityslam::common::Time time;
     std::tie(point_cloud, time) = ToPointCloudWithIntensities(*msg);
     if (!point_cloud.points.empty()) {
         CHECK_LE(point_cloud.points.back().time, 0.f);
@@ -382,7 +376,7 @@ void Node::HandlePointCloud2Message(
     if (sensor_to_tracking == nullptr) {
         LOG(ERROR) << "## ERROR! Found no static tf between sensor frame (" 
             << CheckNoLeadingSlash(msg->header.frame_id) << ") and tracking frame (" 
-            << trajectory_options_.tracking_frame << ").";
+            << ros_wrapper_Options_.tracking_frame << ").";
         return;
     }
 
@@ -407,17 +401,17 @@ void Node::HandlePointCloud2Message(
         }
         // 保存lidar与tracking之间的静态tf信息，供后处理线程读取。
         if (sensor_to_tracking != nullptr) {
-            lidars_to_tracking[
-                CheckNoLeadingSlash(msg->header.frame_id)] = *sensor_to_tracking;
+            lidars_to_tracking_[CheckNoLeadingSlash(msg->header.frame_id)] 
+                = *sensor_to_tracking;
         }
     }
 
     csm_lio_->AddSensorData(
         sensor_id, 
-        ::csmlio::sensor::TimedPointCloudData{
+        ::infinityslam::sensor::TimedPointCloudData{
             time, 
             sensor_to_tracking->translation().cast<float>(),
-            ::csmlio::sensor::TransformTimedPointCloud(
+            ::infinityslam::sensor::TransformTimedPointCloud(
                 point_cloud.points, sensor_to_tracking->cast<float>()),
             point_cloud.intensities});
 }
@@ -426,7 +420,7 @@ void Node::HandleNavSatFixMessage(
     const std::string& sensor_id,
     const sensor_msgs::NavSatFix::ConstPtr& msg) 
 {
-    std::lock_guard<std::mutex> lock(inward_mutex_);
+    std::lock_guard<std::mutex> lock(inner_mutex_);
     LOG(INFO) << "## Received NavSat msg with frame_id (" 
         << msg->header.frame_id << "), stamp (" << msg->header.stamp << ").";
     if (!sensor_samplers_->fixed_frame_pose_sampler.Pulse()) {
@@ -438,10 +432,10 @@ void Node::HandleNavSatFixMessage(
 
 ::ros::NodeHandle* Node::node_handle() { return &node_handle_; }
 
-std::set<csmlio::mapping::SensorId>
-Node::ComputeExpectedSensorIds(const TrajectoryOptions& options) const 
+std::set<infinityslam::mapping::SensorId>
+Node::ComputeExpectedSensorIds(const RosWrapperOptions& options) const 
 {
-    using SensorId = csmlio::mapping::SensorId;
+    using SensorId = infinityslam::mapping::SensorId;
     using SensorType = SensorId::SensorType;
     std::set<SensorId> expected_topics;
     // Subscribe to all point cloud topics.
@@ -463,8 +457,7 @@ Node::ComputeExpectedSensorIds(const TrajectoryOptions& options) const
     return expected_topics;
 }
 
-void Node::LaunchSubscribers(const TrajectoryOptions& options) 
-{
+void Node::LaunchSubscribers(const RosWrapperOptions& options) {
     // PointCloud2
     for (const std::string& topic :
         GenerateRepeatedTopicNames(kPointCloud2Topic, options.num_point_clouds)) {
@@ -515,8 +508,7 @@ void Node::LaunchSubscribers(const TrajectoryOptions& options)
 
 }
 
-void Node::AddSensorSamplers(const TrajectoryOptions& options) 
-{
+void Node::AddSensorSamplers(const RosWrapperOptions& options) {
     sensor_samplers_ = boost::make_unique<TrajectorySensorSamplers>(
         options.rangefinder_sampling_ratio,
         options.odometry_sampling_ratio,
@@ -525,8 +517,7 @@ void Node::AddSensorSamplers(const TrajectoryOptions& options)
 }
 
 /// 发布tracking系的实时tf，发布实时配准点云。
-void Node::PublishSlamResultData(const ::ros::TimerEvent& timer_event) 
-{
+void Node::PublishSlamResultData(const ::ros::TimerEvent& timer_event) {
     std::shared_ptr<const SlamKeyframeData::LioKeyframeData> lio_keyframe_data;
     {
         std::lock_guard<std::mutex> lock(result_mutex_);
@@ -545,34 +536,34 @@ void Node::PublishSlamResultData(const ::ros::TimerEvent& timer_event)
         lio_keyframe_data,
         tf_bridge_->LookupToTracking(
             lio_keyframe_data->time,
-            trajectory_options_.published_frame)};
+            ros_wrapper_Options_.published_frame)};
 
 
     // 发布publish系的静态tf，还是发布tracking系的静态tf？ —— 后者吧。
     const Rigid3d tracking_to_local_3d = lio_keyframe_data->local_pose;
     const Rigid3d tracking_to_local = [&] {
-        if (trajectory_options_.publish_frame_projected_to_2d) {
-            return ::csmlio::transform::Embed3D(
-                ::csmlio::transform::Project2D(tracking_to_local_3d));
+        if (ros_wrapper_Options_.publish_frame_projected_to_2d) {
+            return ::infinityslam::transform::Embed3D(
+                ::infinityslam::transform::Project2D(tracking_to_local_3d));
         }
         return tracking_to_local_3d;
     }();
     const Rigid3d tracking_to_map = tracking_to_local; //单轨迹，local即map。
     geometry_msgs::TransformStamped stamped_transform;    
     stamped_transform.header.stamp = ToRos(lio_keyframe_data->time);
-    stamped_transform.header.frame_id = node_options_.map_frame;
-    stamped_transform.child_frame_id = trajectory_options_.tracking_frame;
+    stamped_transform.header.frame_id = ros_app::options::map_frame;
+    stamped_transform.child_frame_id = ros_wrapper_Options_.tracking_frame;
     stamped_transform.transform = ToGeometryMsgTransform(tracking_to_map);
     tf_broadcaster_.sendTransform(stamped_transform);
 
     /*
     auto& trajectory_data = slam_keyframe_data; //别名
     if (trajectory_data.published_to_tracking != nullptr) {
-        if (node_options_.publish_to_tf) {
+        if (ros_app::options::publish_to_tf) {
             if (trajectory_data.trajectory_options.provide_odom_frame) {
                 std::vector<geometry_msgs::TransformStamped> stamped_transforms;
                 //
-                stamped_transform.header.frame_id = node_options_.map_frame;
+                stamped_transform.header.frame_id = ros_app::options::map_frame;
                 stamped_transform.child_frame_id =
                     trajectory_data.trajectory_options.odom_frame;
                 stamped_transform.transform =
@@ -588,7 +579,7 @@ void Node::PublishSlamResultData(const ::ros::TimerEvent& timer_event)
                 stamped_transforms.push_back(stamped_transform);
                 tf_broadcaster_.sendTransform(stamped_transforms);
             } else {
-                stamped_transform.header.frame_id = node_options_.map_frame;
+                stamped_transform.header.frame_id = ros_app::options::map_frame;
                 stamped_transform.child_frame_id =
                     trajectory_data.trajectory_options.published_frame;
                 stamped_transform.transform = ToGeometryMsgTransform(
@@ -596,9 +587,9 @@ void Node::PublishSlamResultData(const ::ros::TimerEvent& timer_event)
                 tf_broadcaster_.sendTransform(stamped_transform);
             }
         }
-        if (node_options_.publish_tracked_pose) {
+        if (ros_app::options::publish_tracked_pose) {
             ::geometry_msgs::PoseStamped pose_msg;
-            pose_msg.header.frame_id = node_options_.map_frame;
+            pose_msg.header.frame_id = ros_app::options::map_frame;
             pose_msg.header.stamp = stamped_transform.header.stamp;
             pose_msg.pose = ToGeometryMsgPose(tracking_to_map);
             tracked_pose_publisher_.publish(pose_msg);
@@ -637,21 +628,20 @@ void Node::PublishSlamResultData(const ::ros::TimerEvent& timer_event)
         sensor_msgs::PointCloud2 pc2_msg = 
             FromPointCloudToRosPointCloud2(point_cloud_in_local);
         pc2_msg.header.stamp = ToRos(lio_keyframe_data->time);
-        pc2_msg.header.frame_id = node_options_.map_frame;
+        pc2_msg.header.frame_id = ros_app::options::map_frame;
         scan_matched_point_cloud_publisher_.publish(pc2_msg);
     }
 
 }
 
 /// 发布lio/slam轨迹。
-void Node::PublishSlamTrajectory(const ::ros::WallTimerEvent& timer_event) 
-{
+void Node::PublishSlamTrajectory(const ::ros::WallTimerEvent& timer_event) {
     if (slam_trajectory_path_publisher_.getNumSubscribers() > 0) {
-        std::lock_guard<std::mutex> lock(inward_mutex_);
+        std::lock_guard<std::mutex> lock(inner_mutex_);
         const auto& keyframes = csm_lio_->GetSlamKeyframeList();
         nav_msgs::Path ros_path;
         ros_path.header.stamp = ros::Time::now();
-        ros_path.header.frame_id = node_options_.map_frame;
+        ros_path.header.frame_id = ros_app::options::map_frame;
         geometry_msgs::PoseStamped stamped_pose;
         for (const auto& kf : keyframes) {
             stamped_pose.pose.position.x = kf.constant_data->local_pose.translation().x();
@@ -671,19 +661,18 @@ void Node::PublishSlamTrajectory(const ::ros::WallTimerEvent& timer_event)
 }
 
 /// 发布grid格式的submap？
-void Node::PublishSubmapList(const ::ros::WallTimerEvent& timer_event) 
-{
+void Node::PublishSubmapList(const ::ros::WallTimerEvent& timer_event) {
     /// 如果想要按照期望的方式获取submap实体数据，需要从Submap3D::ToResponseProto()函数
     /// 开始复现。比较麻烦，我们暂时不考虑这个需求。
+    /// 如果做的话，我们以点云形式表示3Dsubmap即可，点表示cell的中心位置。
 
 
     // std::lock_guard<std::mutex> lock(xxx_mutex_);
-    // submap_list_publisher_.publish(map_builder_bridge_.GetSubmapList());
+    // submap_list_publisher_.publish();
 }
 
 /// 发布点云形式的全局地图
-void Node::PublishGlobalMapPC(const ::ros::WallTimerEvent& timer_event) 
-{
+void Node::PublishGlobalMapPC(const ::ros::WallTimerEvent& timer_event) {
     if (slam_global_map_publisher_.getNumSubscribers() <= 0) { return; }
 
 
@@ -698,7 +687,7 @@ void Node::PublishGlobalMapPC(const ::ros::WallTimerEvent& timer_event)
     // ##########################################################################
     // ############## 直接用range_data_in_local 做globalmap拼接和显示 ##############
     // ##########################################################################
-    std::lock_guard<std::mutex> lock(inward_mutex_);
+    std::lock_guard<std::mutex> lock(inner_mutex_);
     const auto& keyframes = csm_lio_->GetSlamKeyframeList();
     if (keyframes.empty()) {
         LOG(WARNING) << "## No keframes exist, publish no global map.";
@@ -716,7 +705,7 @@ void Node::PublishGlobalMapPC(const ::ros::WallTimerEvent& timer_event)
     last_published_global_map_kf_id_ = current_latest_kf_id;
 
     // 拼接&体素将采样&生成点云地图。
-    using ::csmlio::sensor::RangefinderPoint;
+    using ::infinityslam::sensor::RangefinderPoint;
     std::vector<RangefinderPoint> global_map_points;
     std::vector<float> global_map_intensities;
     std::vector<RangefinderPoint> temp_submap_points;
@@ -759,8 +748,8 @@ void Node::PublishGlobalMapPC(const ::ros::WallTimerEvent& timer_event)
                 temp_submap_intensities.push_back(assign_intensity ? 10.f : intensities[i]);
             }
             if (temp_submap_kf_num == submap_kf_num_limit) {
-                auto filtered_temp_submap = ::csmlio::sensor::VoxelFilter(
-                    ::csmlio::sensor::PointCloud(temp_submap_points,temp_submap_intensities), 
+                auto filtered_temp_submap = ::infinityslam::sensor::VoxelFilter(
+                    ::infinityslam::sensor::PointCloud(temp_submap_points,temp_submap_intensities), 
                     voxel_size);
                 const auto& filtered_submap_points = filtered_temp_submap.points();
                 const auto& filtered_submap_intensities = filtered_temp_submap.intensities();
@@ -779,8 +768,8 @@ void Node::PublishGlobalMapPC(const ::ros::WallTimerEvent& timer_event)
     }
     // make sure you don't miss the last 'incomplete' submap!
     if (temp_submap_kf_num > 0) {
-        auto filtered_temp_submap = ::csmlio::sensor::VoxelFilter(
-            ::csmlio::sensor::PointCloud(temp_submap_points,temp_submap_intensities), 
+        auto filtered_temp_submap = ::infinityslam::sensor::VoxelFilter(
+            ::infinityslam::sensor::PointCloud(temp_submap_points,temp_submap_intensities), 
             voxel_size);
         const auto& filtered_submap_points = filtered_temp_submap.points();
         const auto& filtered_submap_intensities = filtered_temp_submap.intensities();
@@ -791,11 +780,11 @@ void Node::PublishGlobalMapPC(const ::ros::WallTimerEvent& timer_event)
                 filtered_submap_intensities.begin(), filtered_submap_intensities.end());
         }
     }
-    ::csmlio::sensor::PointCloud global_map(global_map_points, global_map_intensities);
+    ::infinityslam::sensor::PointCloud global_map(global_map_points, global_map_intensities);
 
     global_map_ros_pc2_ = FromPointCloudToRosPointCloud2(global_map);
     global_map_ros_pc2_.header.stamp = ros::Time::now();
-    global_map_ros_pc2_.header.frame_id = node_options_.map_frame;
+    global_map_ros_pc2_.header.frame_id = ros_app::options::map_frame;
     slam_global_map_publisher_.publish(global_map_ros_pc2_);
     LOG(INFO) << "## Published global map, info: " 
         << keyframes.size() << " keframes, "
@@ -803,32 +792,19 @@ void Node::PublishGlobalMapPC(const ::ros::WallTimerEvent& timer_event)
 
 }
 
-/// 以一定的频率触keyframe后处理线程。
-void Node::TriggerPostprocOnce(const ::ros::TimerEvent& timer_event) 
-{
-    {
-        std::lock_guard<std::mutex> lock1(inward_mutex_);
-        std::lock_guard<std::mutex> lock2(postproc_mutex_);
-        timed_pose_queue_ = csm_lio_->GetTimedPoseQueue();
-        if (timed_pose_queue_.size() > 2 && 
-            timed_pose_queue_.back().time > last_processed_kf_time_) {
-            new_kf_flag_.store(true);
-            cv_.notify_one();
-        }
+/// 以一定的频率触发keyframe后处理线程。
+void Node::TriggerPostProcOnce(const ::ros::TimerEvent& timer_event) {
+    std::lock_guard<std::mutex> lock1(inner_mutex_);
+    std::lock_guard<std::mutex> lock2(postproc_mutex_);
+    timed_pose_queue_ = csm_lio_->GetTimedPoseQueue();
+    if (timed_pose_queue_.size() > 2 && 
+        timed_pose_queue_.back().time > last_processed_kf_time_) {
+        new_kf_flag_.store(true);
+        cv_.notify_one();
     }
 }
 
-bool Node::ValidateLioOptions(const TrajectoryOptions& options) 
-{
-    if (node_options_.map_builder_options.use_trajectory_builder_3d()) {
-        return options.trajectory_builder_options
-            .has_trajectory_builder_3d_options();
-    }
-    return false;
-}
-
-bool Node::ValidateTopicNames(const TrajectoryOptions& options) 
-{
+bool Node::ValidateTopicNames(const RosWrapperOptions& options) {
     for (const auto& sensor_id : expected_sensor_ids_) {
         const std::string& topic = sensor_id.id;
         if (subscribed_topics_.count(topic) > 0) {
@@ -840,9 +816,8 @@ bool Node::ValidateTopicNames(const TrajectoryOptions& options)
 }
 
 void Node::MaybeWarnAboutTopicMismatch(
-    const ::ros::WallTimerEvent& timer_event) 
-{
-    std::lock_guard<std::mutex> lock(inward_mutex_);
+    const ::ros::WallTimerEvent& timer_event) {
+    std::lock_guard<std::mutex> lock(inner_mutex_);
     ::ros::master::V_TopicInfo ros_topics;
     ::ros::master::getTopics(ros_topics); //从ROS系统中获取当前发布的所有话题。
     std::set<std::string> published_topics;
@@ -869,17 +844,17 @@ void Node::MaybeWarnAboutTopicMismatch(
 }
 
 void Node::OnLioResult(
-    const ::csmlio::common::Time time,
+    const ::infinityslam::common::Time time,
     const Rigid3d local_pose,
-    ::csmlio::sensor::RangeData range_data_in_local,
-    std::shared_ptr<::csmlio::sensor::PointCloud> point_cloud,
-    std::unique_ptr<const ::csmlio::mapping::InsertionResult> insertion_result) 
+    ::infinityslam::sensor::RangeData range_data_in_local,
+    std::shared_ptr<::infinityslam::sensor::PointCloud> point_cloud,
+    std::unique_ptr<const ::infinityslam::mapping::InsertionResult> insertion_result) 
 {
     // 对于指针对象，我们必须深拷贝数据，避免wrapper层和core层访问同一个数据块。
-    std::shared_ptr<::csmlio::sensor::PointCloud> point_cloud_;
+    std::shared_ptr<::infinityslam::sensor::PointCloud> point_cloud_;
     if (point_cloud != nullptr) {
         point_cloud_.reset(
-            new ::csmlio::sensor::PointCloud(point_cloud->points(), 
+            new ::infinityslam::sensor::PointCloud(point_cloud->points(), 
                                                 point_cloud->intensities()));
     }
 
@@ -899,46 +874,46 @@ void Node::OnLioResult(
     // TODO 直接调用Submap3D接口，获取并保存低分辨率hybridgrid的有效cell。
 }
 
-void Node::PerformPostprocKfLoop()
+void Node::PerformPostProcKfLoop()
 {
     while (!quit_postproc_flag_) {
         // 解释：
         // conditional_variable的wait函数只接受unique_lock类型的锁，这种锁可以在持有互斥量的同时而不锁住互斥量；
-        // 条件变量的wait函数会让当前线程阻塞在这里，直到notified；
+        // conditional_variable的wait函数会让当前线程阻塞在这里，直到notified；
         // wait函数在阻塞当前线程的同时，会解锁unique_lock对象所持有的mutex，以便其它线程能够访问mutex；
         // wait函数在被notified时，会尝试锁住unique_lock对象所持有的mutex，并查询lambda返回值；
         // wait()函数只有在满足mutex被lock，且lambda表达时为true时，才会结束等待（结束阻塞），允许当前线程继续往下执行。
         // 详情参见C++官网：https://cplusplus.com/reference/condition_variable/condition_variable/wait/
         std::unique_lock<std::mutex> lock(postproc_mutex_);
         cv_.wait(lock, [this](){return new_kf_flag_.load();});
-        // LOG(INFO) << "Postproc: triggered. ";
+        // LOG(INFO) << "PostProc: triggered. ";
 
         // 拷贝数据段，然后释放互斥量；
-        using namespace ::csmlio;
-        int start_index = -1;
+        int kf_st_index = -1;
         for (int i = timed_pose_queue_.size()-1; i>=0; --i) {
             if (timed_pose_queue_[i].time <= last_processed_kf_time_) {
-                start_index = i;
+                kf_st_index = i;
                 break;
             }
         }
-        if (start_index < 0) start_index = 0;
-        int end_index = start_index + 1;
-        if (end_index >= timed_pose_queue_.size()) {
-            LOG(WARNING) << "Postproc: haven't accumulated enough timed pose (found " 
+        if (kf_st_index < 0) kf_st_index = 0;
+        int kf_ed_index = kf_st_index + 1;
+        if (kf_ed_index >= timed_pose_queue_.size()) {
+            LOG(WARNING) << "PostProc: haven't accumulated enough timed pose (found " 
                 << timed_pose_queue_.size() << ", while >=2 is required).";
             new_kf_flag_.store(false);
             lock.unlock();
             continue;
         }
-        const common::Time kf_st_time_ = timed_pose_queue_[start_index].time;
-        const common::Time kf_ed_time_ = timed_pose_queue_[end_index].time;
-        const common::Time kf_ed_time_ext_ = 
-            kf_ed_time_ + common::FromSeconds(0.5 * kInterpTimeStep);
+        const infinityslam::common::Time kf_st_time_ = timed_pose_queue_[kf_st_index].time;
+        const infinityslam::common::Time kf_ed_time_ = timed_pose_queue_[kf_ed_index].time;
+        const infinityslam::common::Time kf_ed_time_plus_ = /*延伸半个插值步长，以包容时间戳格式转换误差*/
+            kf_ed_time_ + infinityslam::common::FromSeconds(0.5 * kInterpTimeStep);
         // 获取时间段内的配准位姿
         timed_pose_segment_.clear();
-        for (int i=start_index; i<=end_index; ++i) {
-            timed_pose_segment_.push_back(timed_pose_queue_[i]);
+        for (int i=kf_st_index; i<=kf_ed_index; ++i) {
+            timed_pose_segment_.push_back(infinityslam::utils::CreateFullTimedPose(timed_pose_queue_[i]));
+            // timed_pose_segment_.push_back(timed_pose_queue_[i]);
         }
         // 获取时间段内的IMU数据。
         imu_data_segment_.clear();
@@ -955,18 +930,17 @@ void Node::PerformPostprocKfLoop()
                 imu_data_segment_.push_back(imu_queue_[i]);
             }
         }
-        // 获取时间段内的PointCloud2数据。
-        // 对每一个点云队列，找出所有“点云时段”与“[kf_st_time_, kf_ed_time_ + kInterpTimeStep / 2]时段”
-        // 有overlap的msg，作为处理的对象。其中“+ kInterpTimeStep / 2”是为了包容时间戳格式转换误差。
+        // 获取时间段内的PointCloud2数据，不同LiDAR的msg都保存在同一个容器中即可。
+        // 对每一个点云队列，找出所有与“[kf_st_time_, kf_ed_time_plus_]时段”有overlap的msg，作为处理的对象。
         pc2_data_segment_.clear();
         for (auto& pair : point_cloud_queues_) {
             auto& pc2_data_queue = *(pair.second);
             int pop_to_here = -1;
             for (size_t i = 0; i < pc2_data_queue.size(); ++i) {
                 auto pc2_st_time = GetPC2StartTime(*pc2_data_queue[i]);
-                auto pc2_end_time = GetPC2EndTime(*pc2_data_queue[i]);
-                if (pc2_end_time < kf_ed_time_ext_) pop_to_here = i;
-                if (pc2_st_time < kf_ed_time_ext_ && pc2_end_time > kf_st_time_) {
+                auto pc2_ed_time = GetPC2EndTime(*pc2_data_queue[i]);
+                if (pc2_ed_time < kf_ed_time_plus_) pop_to_here = i;
+                if (pc2_st_time < kf_ed_time_plus_ && pc2_ed_time > kf_st_time_) {
                     pc2_data_segment_.push_back(pc2_data_queue[i]);
                 }
             }
@@ -977,46 +951,84 @@ void Node::PerformPostprocKfLoop()
             }
             
         }
+        // 获取当前所有lidars到tracking的静态tf。
+        lidars_to_tracking_vec_.clear();
+        for (auto pair : lidars_to_tracking_) {
+            lidars_to_tracking_vec_.push_back(pair);
+        }
 
         // 拷贝数据结束，释放锁。
+        // LOG(INFO) << "PostProc: copied necessary data segment.";
         lock.unlock();
 
         
-        ::csmlio::mapping::InterpolatePoseTable(
-            kf_st_time_, kf_ed_time_, 
+        bool interp_success = ::infinityslam::utils::InterpolatePoseTable(
+            kf_st_time_, 
+            kf_ed_time_, 
             timed_pose_segment_, 
             imu_data_segment_, 
             kInterpTimeStep, 
             relative_pose_table_);
 
-        for (auto pair : lidars_to_tracking) {
-            std::string registered_frame_id = pair.first;
-            auto lidar_to_tracking = pair.second;
-            std::vector<::csmlio::transform::Rigid3d> lidar_pose_table;
-            for (auto& pose : relative_pose_table_) {
-                lidar_pose_table.push_back(pose.pose * lidar_to_tracking);
-            }
-            // 找出所有frame_id符合的PC2消息；
-            // 解析PC2点云格式为可处理格式；
-            // 统一转换到end时间点的lidar位姿下；
-            for (auto& pc2_ : pc2_data_segment_) {
-                // if (CheckNoLeadingSlash())
-                slam_postproc_kf_pc_publisher_.publish(*pc2_);
-            }
-            // 转换回PC2格式，Ros::Publisher发送出去。
-            // slam_postproc_kf_pc_publisher_
+        if (!interp_success) {
+            //
         }
-        
-        // LOG(INFO) << "Postproc: copied necessary data segment.";
-        // 然后执行去畸变并publish，然后结束。
-        // ...
-        // LOG(INFO) << "Postproc: merged and deskewed key frame.";
-        // slam_processed_keyframe_pc_publisher_.publish();
+
+        for (auto pair : lidars_to_tracking_vec_) {
+            std::string& registered_frame_id = pair.first;
+            auto& lidar_to_tracking = pair.second;
+            // 由tracking系的相对位姿表，算出lidar系的相对位姿表
+            std::vector<::infinityslam::transform::Rigid3d> lidar_pose_table;
+            for (auto& t_pose : relative_pose_table_) {
+                lidar_pose_table.push_back(t_pose.pose * lidar_to_tracking);
+            }
+            lidar_pose_table.push_back(Rigid3d::Identity());
+
+            // 找出所有frame_id一致的PC2消息；解析PC2点云格式为可处理格式；统一转换到end时间点的lidar位姿下；发布。
+            for (auto& pc2_ : pc2_data_segment_) {
+                if (CheckNoLeadingSlash(pc2_->header.frame_id) == registered_frame_id) {
+                    ::infinityslam::sensor::PointCloudWithIntensities point_cloud;
+                    ::infinityslam::common::Time point_cloud_time;
+                    std::tie(point_cloud, point_cloud_time) = ToPointCloudWithIntensities(*pc2_);
+                    // LOG(INFO) << "PostProc: kf timestamp delta " << std::fixed << std::setprecision(3)
+                    //     << infinityslam::common::ToSeconds(point_cloud_time - kf_st_time_) << " s.";
+                    auto PointTimeToIndex = [&](double rel_time)->int {
+                        // lambda expression
+                        rel_time += infinityslam::common::ToSeconds(point_cloud_time - kf_st_time_);
+                        
+                        int index = rel_time / kInterpTimeStep;
+                        // 
+                        if (index < 0 || index >= lidar_pose_table.size()) return 0;
+                        return index;
+                    };
+                    for (auto& point_ : point_cloud.points) {
+                        // TODO here.
+                        // 查询点的相对时间，转化为rel_pose_table索引
+                        // 用索引位姿做去畸变
+                        int pose_idx = PointTimeToIndex(point_.time);
+                        const Eigen::Vector3d point_in_ed_time = 
+                            lidar_pose_table[pose_idx] * (point_.position.cast<double>());
+                        point_.position = point_in_ed_time.cast<float>();
+                    }
+                    
+                    sensor_msgs::PointCloud2 deskewed_pc2 = 
+                        ToPointCloud2Message(infinityslam::common::ToUniversal(kf_ed_time_), 
+                            pc2_->header.frame_id, point_cloud);
+                    deskewed_pc2.header = pc2_->header;
+                    deskewed_pc2.header.stamp = ToRos(kf_ed_time_);
+                    slam_postproc_kf_pc_publisher_.publish(deskewed_pc2);
+                    // slam_postproc_kf_pc_publisher_.publish(*pc2_);
+                }
+            }
+        }
+        // LOG(INFO) << "PostProc: merged and deskewed key frame.";
 
         // 执行完毕，结束本次循环。
         last_processed_kf_time_ = kf_ed_time_;
         new_kf_flag_.store(false);
-        LOG(INFO) << "Postproc: took XXX ms, merged XXX points, advanced to time point [xxx, xxx].";
+        // LOG(INFO) << "PostProc: took XXX ms, merged XXX points, advanced to time point [xxx, xxx].";
+        // LOG(INFO) << "PostProc: took XXX ms, merged XXX points, processed kf_id " << postproc_kf_id << ".";
+        ++postproc_kf_id;
 
     }
 }

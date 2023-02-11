@@ -34,7 +34,6 @@ find_package(absl REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system filesystem thread iostreams)
 find_package(Ceres REQUIRED COMPONENTS SuiteSparse)
-find_package(LuaGoogle REQUIRED)
 message(STATUS "######### absl_FOUND        : " ${absl_FOUND})
 message(STATUS "######### absl_INCLUDE_DIR  : " ${absl_INCLUDE_DIR})
 message(STATUS "######### absl_LIBRARIES    : " ${abslLIBRARIES})
@@ -43,10 +42,6 @@ message(STATUS "######### EIGEN3_LIBRARIES  : " ${EIGEN3_LIBRARIES})
 message(STATUS "######### Boost_INCLUDE_DIRS: " ${Boost_INCLUDE_DIRS})
 message(STATUS "######### Boost_LIBRARY_DIRS: " ${Boost_LIBRARY_DIRS})
 message(STATUS "######### Boost_LIBRARIES   : " ${Boost_LIBRARIES})
-message(STATUS "######### Is LuaGoogle found: " ${LuaGoogle_FOUND})
-message(STATUS "######### Is    LUA    found: " ${LUA_FOUND})
-message(STATUS "######### LUA_INCLUDE_DIR   : " ${LUA_INCLUDE_DIR})
-message(STATUS "######### LUA_LIBRARIES     : " ${LUA_LIBRARIES})
 if(NOT absl_FOUND)
   message(FATAL_ERROR "absl not found.")
 endif()
@@ -55,6 +50,11 @@ find_package(Protobuf 3.0.0 REQUIRED)
 
 include(FindPkgConfig)
 PKG_SEARCH_MODULE(CAIRO REQUIRED cairo>=1.12.16)
+
+find_package(yaml-cpp REQUIRED)
+message(STATUS "######### Is yaml-cpp found   : " yaml-cpp_FOUND)
+message(STATUS "######### YAML_CPP_INCLUDE_DIR: " ${YAML_CPP_INCLUDE_DIR})
+message(STATUS "######### YAML_CPP_LIBRARIES  : " ${YAML_CPP_LIBRARIES})
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
@@ -78,8 +78,8 @@ message(STATUS "## #############################################################
 ## 解决方法是在初始化项目的宏中手动设置regenerate条件。
 file(GLOB_RECURSE ALL_HDRS "*.h")
 file(GLOB_RECURSE ALL_SRCS "*.cc")
-file(GLOB_RECURSE ALL_CORE_HDRS "csmlio/*.h")
-file(GLOB_RECURSE ALL_CORE_SRCS "csmlio/*.cc")
+file(GLOB_RECURSE ALL_CORE_HDRS "infinityslam/*.h")
+file(GLOB_RECURSE ALL_CORE_SRCS "infinityslam/*.cc")
 file(GLOB_RECURSE ALL_WRAPPER_HDRS "ros_app/*.h")
 file(GLOB_RECURSE ALL_WRAPPER_SRCS "ros_app/*.cc")
 file(GLOB_RECURSE ALL_EXECUTABLES "*_main.cc")
@@ -106,8 +106,8 @@ target_include_directories(${PROJECT_CORE} SYSTEM PUBLIC
 target_link_libraries(${PROJECT_CORE} PUBLIC ${CERES_LIBRARIES})
 
 target_include_directories(${PROJECT_CORE} SYSTEM PUBLIC
-  "${LUA_INCLUDE_DIR}")
-target_link_libraries(${PROJECT_CORE} PUBLIC ${LUA_LIBRARIES})
+  "${YAML_CPP_INCLUDE_DIR}")
+target_link_libraries(${PROJECT_CORE} PUBLIC ${YAML_CPP_LIBRARIES})
 
 target_include_directories(${PROJECT_CORE} SYSTEM PUBLIC
   "${Boost_INCLUDE_DIRS}")
@@ -246,6 +246,7 @@ catkin_package(
 set(ROS_APP_SRCS 
   ros_app/src/ros_app_node_main.cc
   ros_app/src/ros_wrapper.cc
+  ros_app/src/ros_wrapper_options.cc
   ros_app/src/time_conversion.cc
   ros_app/src/msg_conversion.cc
   ros_app/src/node_constants.cc
@@ -267,8 +268,8 @@ add_executable(${PROJECT_ROS_APP_NODE} ${ROS_APP_SRCS})
 
 target_link_libraries(${PROJECT_ROS_APP_NODE} PUBLIC ${PROJECT_CORE})
 
-# Lua
-target_include_directories(${PROJECT_ROS_APP_NODE} SYSTEM PUBLIC ${LUA_INCLUDE_DIR})
+# yaml-cpp
+target_include_directories(${PROJECT_ROS_APP_NODE} SYSTEM PUBLIC ${YAML_CPP_INCLUDE_DIR})
 
 # PCL
 target_include_directories(${PROJECT_ROS_APP_NODE} SYSTEM PUBLIC ${PCL_INCLUDE_DIRS})
@@ -334,8 +335,8 @@ add_library(${PROJECT_DYNC_REMOVER_NODE} STATIC ${DYNC_REMOVER_HDRS} ${DYNC_REMO
 
 target_link_libraries(${PROJECT_DYNC_REMOVER_NODE} PUBLIC ${PROJECT_CORE})
 
-# Lua
-target_include_directories(${PROJECT_DYNC_REMOVER_NODE} SYSTEM PUBLIC ${LUA_INCLUDE_DIR})
+# yaml-cpp
+target_include_directories(${PROJECT_ROS_APP_NODE} SYSTEM PUBLIC ${YAML_CPP_INCLUDE_DIR})
 
 # PCL
 target_include_directories(${PROJECT_DYNC_REMOVER_NODE} SYSTEM PUBLIC ${PCL_INCLUDE_DIRS})
@@ -354,7 +355,7 @@ target_link_libraries(${PROJECT_DYNC_REMOVER_NODE} PUBLIC ${Boost_LIBRARIES})
 target_include_directories(${PROJECT_DYNC_REMOVER_NODE} SYSTEM PUBLIC ${catkin_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_DYNC_REMOVER_NODE} PUBLIC ${catkin_LIBRARIES})
 
-set(DYNC_REMOVER_COMPILE_FLAGS "${CORE_COMPILE_FLAGS}")  # CORE_COMPILE_FLAGS  ROS_APP_COMPILE_FLAGS
+set(DYNC_REMOVER_COMPILE_FLAGS "${CORE_COMPILE_FLAGS}")
 message(STATUS "######### DYNC_REMOVER_COMPILE_FLAGS: ${DYNC_REMOVER_COMPILE_FLAGS}")
 set_target_properties(${PROJECT_DYNC_REMOVER_NODE} PROPERTIES
   COMPILE_FLAGS ${DYNC_REMOVER_COMPILE_FLAGS})

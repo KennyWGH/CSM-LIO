@@ -19,7 +19,7 @@
 
 #include <memory>
 
-#include "csmlio/transform/rigid_transform.h"
+#include "infinityslam/transform/rigid_transform.h"
 #include "ros_app/src/time_conversion.h"
 #include "tf2_ros/buffer.h"
 
@@ -37,8 +37,8 @@ class TfBridge {
 
   // Returns the transform for 'frame_id' to 'tracking_frame_' if it exists at
   // 'time'.
-  std::unique_ptr<::csmlio::transform::Rigid3d> LookupToTracking(
-      ::csmlio::common::Time time, const std::string& frame_id) const;
+  std::unique_ptr<::infinityslam::transform::Rigid3d> LookupToTracking(
+      ::infinityslam::common::Time time, const std::string& frame_id) const;
 
  private:
   const std::string tracking_frame_;

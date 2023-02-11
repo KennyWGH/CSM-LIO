@@ -16,7 +16,8 @@
 
 #include "ros_app/src/tf_bridge.h"
 
-#include "absl/memory/memory.h"
+#include <boost/make_unique.hpp>
+
 #include "ros_app/src/msg_conversion.h"
 
 namespace ros_app {
@@ -28,12 +29,12 @@ TfBridge::TfBridge(const std::string& tracking_frame,
       lookup_transform_timeout_sec_(lookup_transform_timeout_sec),
       buffer_(buffer) {}
 
-std::unique_ptr<::csmlio::transform::Rigid3d> TfBridge::LookupToTracking(
-    const ::csmlio::common::Time time,
+std::unique_ptr<::infinityslam::transform::Rigid3d> TfBridge::LookupToTracking(
+    const ::infinityslam::common::Time time,
     const std::string& frame_id) const 
 {
   ::ros::Duration timeout(lookup_transform_timeout_sec_);
-  std::unique_ptr<::csmlio::transform::Rigid3d> frame_id_to_tracking;
+  std::unique_ptr<::infinityslam::transform::Rigid3d> frame_id_to_tracking;
   try {
     const ::ros::Time latest_tf_time =
         buffer_
@@ -46,7 +47,7 @@ std::unique_ptr<::csmlio::transform::Rigid3d> TfBridge::LookupToTracking(
       // for the full 'timeout' even if we ask for data that is too old.
       timeout = ::ros::Duration(0.);
     }
-    return absl::make_unique<::csmlio::transform::Rigid3d>(
+    return boost::make_unique<::infinityslam::transform::Rigid3d>(
         ToRigid3d(buffer_->lookupTransform(tracking_frame_, frame_id,
                                            requested_time, timeout)));
   } catch (const tf2::TransformException& ex) {

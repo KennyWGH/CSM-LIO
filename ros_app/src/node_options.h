@@ -20,16 +20,13 @@
 #include <string>
 #include <tuple>
 
-#include "csmlio/common/lua_parameter_dictionary.h"
-#include "csmlio/common/port.h"
-#include "csmlio/lio/proto/map_builder_options.pb.h"
+#include "infinityslam/common/port.h"
 #include "ros_app/src/trajectory_options.h"
 
 namespace ros_app {
 
 // Top-level options of Cartographer's ROS integration.
 struct NodeOptions {
-  ::csmlio::mapping::proto::MapBuilderOptions map_builder_options;
   std::string map_frame;
   double lookup_transform_timeout_sec;
   double submap_publish_period_sec;
@@ -40,12 +37,7 @@ struct NodeOptions {
   bool use_pose_extrapolator = true;
 };
 
-NodeOptions CreateNodeOptions(
-    ::csmlio::common::LuaParameterDictionary* lua_parameter_dictionary);
 
-std::tuple<NodeOptions, TrajectoryOptions> LoadOptions(
-    const std::string& configuration_directory,
-    const std::string& configuration_basename);
 }  // namespace ros_app
 
 #endif  // ROS_APP_NODE_OPTIONS_H

@@ -22,11 +22,11 @@
 #include "Eigen/Geometry"
 #include "absl/synchronization/mutex.h"
 #include "cairo/cairo.h"
-#include "csmlio/common/port.h"
-#include "csmlio/io/image.h"
-#include "csmlio/io/submap_painter.h"
-#include "csmlio/lio/id.h"
-#include "csmlio/transform/rigid_transform.h"
+#include "infinityslam/common/port.h"
+#include "infinityslam/io/image.h"
+#include "infinityslam/io/submap_painter.h"
+#include "infinityslam/csmlio/id.h"
+#include "infinityslam/transform/rigid_transform.h"
 #include "ros_app/src/msg_conversion.h"
 #include "ros_app/src/node_constants.h"
 #include "ros_app/src/ros_log_sink.h"
@@ -50,9 +50,9 @@ DEFINE_string(occupancy_grid_topic, cartographer_ros::kOccupancyGridTopic,
 namespace ros_app {
 namespace {
 
-using ::csmlio::io::PaintSubmapSlicesResult;
-using ::csmlio::io::SubmapSlice;
-using ::csmlio::mapping::SubmapId;
+using ::infinityslam::io::PaintSubmapSlicesResult;
+using ::infinityslam::io::SubmapSlice;
+using ::infinityslam::mapping::SubmapId;
 
 class Node {
  public:
@@ -145,7 +145,7 @@ void Node::HandleSubmapList(
     submap_slice.slice_pose = fetched_texture->slice_pose;
     submap_slice.resolution = fetched_texture->resolution;
     submap_slice.cairo_data.clear();
-    submap_slice.surface = ::csmlio::io::DrawTexture(
+    submap_slice.surface = ::infinityslam::io::DrawTexture(
         fetched_texture->pixels.intensity, fetched_texture->pixels.alpha,
         fetched_texture->width, fetched_texture->height,
         &submap_slice.cairo_data);

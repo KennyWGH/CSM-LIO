@@ -19,15 +19,11 @@
 
 #include <string>
 
-#include "csmlio/common/lua_parameter_dictionary.h"
-#include "csmlio/common/port.h"
-#include "csmlio/lio/proto/trajectory_builder_options.pb.h"
+#include "infinityslam/common/port.h"
 
 namespace ros_app {
 
 struct TrajectoryOptions {
-  ::csmlio::mapping::proto::TrajectoryBuilderOptions
-      trajectory_builder_options;
   std::string tracking_frame;
   std::string published_frame;
   std::string odom_frame;
@@ -47,8 +43,6 @@ struct TrajectoryOptions {
   double landmarks_sampling_ratio;
 };
 
-TrajectoryOptions CreateTrajectoryOptions(
-    ::csmlio::common::LuaParameterDictionary* lua_parameter_dictionary);
 
 }  // namespace ros_app
 

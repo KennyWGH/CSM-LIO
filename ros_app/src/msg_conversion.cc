@@ -1,6 +1,6 @@
 /**
  * Copyright 2016 The Cartographer Authors
- * Copyright 2023 WANG Guanhua (wangxxx@gmail.com)
+ * Copyright 2022 WANG Guanhua (wangxxx@gmail.com)
  * Licensed under the Apache License, Version 2.0 (the "License").
 */
 
@@ -24,11 +24,11 @@
 #include "geometry_msgs/Vector3.h"
 #include "pcl_conversions/pcl_conversions.h"
 
-#include "csmlio/common/math.h"
-#include "csmlio/common/port.h"
-#include "csmlio/common/time.h"
-#include "csmlio/io/submap_painter.h"
-#include "csmlio/transform/transform.h"
+#include "infinityslam/common/math.h"
+#include "infinityslam/common/port.h"
+#include "infinityslam/common/time.h"
+// #include "infinityslam/io/submap_painter.h"
+#include "infinityslam/transform/transform.h"
 #include "ros_app/src/time_conversion.h"
 #include "ros_app/src/msg_conversion.h"
 
@@ -68,15 +68,15 @@ namespace {
 // properly.
 constexpr float kPointCloudComponentFourMagic = 1.;
 
-using ::csmlio::sensor::PointCloudWithIntensities;
-using ::csmlio::transform::Rigid3d;
+using ::infinityslam::sensor::PointCloudWithIntensities;
+using ::infinityslam::transform::Rigid3d;
 
 sensor_msgs::PointCloud2 PreparePointCloud2Message(const int64_t timestamp,
                                                    const std::string& frame_id,
                                                    const int num_points) 
 {
     sensor_msgs::PointCloud2 msg;
-    msg.header.stamp = ToRos(::csmlio::common::FromUniversal(timestamp));
+    msg.header.stamp = ToRos(::infinityslam::common::FromUniversal(timestamp));
     msg.header.frame_id = frame_id;
     msg.height = 1;
     msg.width = num_points;
@@ -107,7 +107,7 @@ sensor_msgs::PointCloud2 PreparePointCloud2MessageWithIntensity(
                                                 const int num_points) 
 {
     sensor_msgs::PointCloud2 msg;
-    msg.header.stamp = ToRos(::csmlio::common::FromUniversal(timestamp));
+    msg.header.stamp = ToRos(::infinityslam::common::FromUniversal(timestamp));
     msg.header.frame_id = frame_id;
     msg.height = 1;
     msg.width = num_points;
@@ -147,7 +147,7 @@ bool PointCloud2HasField(const sensor_msgs::PointCloud2& pc2,
     return false;
 }
 
-using TimedRangefinderPoint = ::csmlio::sensor::TimedRangefinderPoint;
+using TimedRangefinderPoint = ::infinityslam::sensor::TimedRangefinderPoint;
 bool CompByStamp(const TimedRangefinderPoint& point1, 
     const TimedRangefinderPoint& point2)
 {
@@ -161,11 +161,11 @@ std::unordered_map<std::string, bool> warned_table;
 
 sensor_msgs::PointCloud2 ToPointCloud2Message(
     const int64_t timestamp, const std::string& frame_id,
-    const ::csmlio::sensor::TimedPointCloud& point_cloud) 
+    const ::infinityslam::sensor::TimedPointCloud& point_cloud) 
 {
     auto msg = PreparePointCloud2Message(timestamp, frame_id, point_cloud.size());
     ::ros::serialization::OStream stream(msg.data.data(), msg.data.size());
-    for (const csmlio::sensor::TimedRangefinderPoint& point : point_cloud) {
+    for (const infinityslam::sensor::TimedRangefinderPoint& point : point_cloud) {
         stream.next(point.position.x());
         stream.next(point.position.y());
         stream.next(point.position.z());
@@ -176,7 +176,7 @@ sensor_msgs::PointCloud2 ToPointCloud2Message(
 
 sensor_msgs::PointCloud2 ToPointCloud2Message(
     const int64_t timestamp, const std::string& frame_id,
-    const ::csmlio::sensor::PointCloudWithIntensities& point_cloud) 
+    const ::infinityslam::sensor::PointCloudWithIntensities& point_cloud) 
 {
     auto msg = PreparePointCloud2MessageWithIntensity(timestamp, 
                                                         frame_id, 
@@ -191,8 +191,8 @@ sensor_msgs::PointCloud2 ToPointCloud2Message(
     return msg;
 }
 
-std::tuple<::csmlio::sensor::PointCloudWithIntensities,
-           ::csmlio::common::Time>
+std::tuple<::infinityslam::sensor::PointCloudWithIntensities,
+           ::infinityslam::common::Time>
 ToPointCloudWithIntensities(const sensor_msgs::PointCloud2& msg) 
 {
     PointCloudWithIntensities point_cloud;
@@ -245,7 +245,7 @@ ToPointCloudWithIntensities(const sensor_msgs::PointCloud2& msg)
         }
     }
     // 把帧的时间戳移动到最后一个点（而非ROS格式中的第一个点）
-    ::csmlio::common::Time timestamp = FromRos(msg.header.stamp);
+    ::infinityslam::common::Time timestamp = FromRos(msg.header.stamp);
     if (!point_cloud.points.empty()) {
         // 一个更正确的、寻找点云中时间戳最大的点的方法；
         // 该方法支持“点云中的点并没有按时间先后顺序排序”的情形。
@@ -259,7 +259,7 @@ ToPointCloudWithIntensities(const sensor_msgs::PointCloud2& msg)
                 "(frame_id: " << msg.header.frame_id << ") larger than 100ms, "
                 "which is " << int(duration * 1000) << "ms.";
         }
-        timestamp += csmlio::common::FromSeconds(duration);
+        timestamp += infinityslam::common::FromSeconds(duration);
         for (auto& point : point_cloud.points) {
             point.time -= duration;
             // CHECK_LE(point.time, 0.f)
@@ -277,37 +277,37 @@ ToPointCloudWithIntensities(const sensor_msgs::PointCloud2& msg)
     return std::make_tuple(point_cloud, timestamp);
 }
 
-::csmlio::common::Time GetPC2StartTime(
+::infinityslam::common::Time GetPC2StartTime(
     const sensor_msgs::PointCloud2& msg)
 {
     return FromRos(msg.header.stamp);
 }
 
-::csmlio::common::Time GetPC2EndTime(
+::infinityslam::common::Time GetPC2EndTime(
     const sensor_msgs::PointCloud2& msg) 
 {
     if (PointCloud2HasField(msg, "time")) {
         pcl::PointCloud<PointXYZT> pcl_point_cloud;
         pcl::fromROSMsg(msg, pcl_point_cloud);
-        float largest_rel_stamp = 0;
+        float largest_point_time = 0;
         for (auto& point : pcl_point_cloud.points) {
-            if (point.time > largest_rel_stamp)
-                largest_rel_stamp = point.time;
+            if (point.time > largest_point_time)
+                largest_point_time = point.time;
         }
 
         // { // debug.
-        //     ::csmlio::common::Time p_time = 
+        //     ::infinityslam::common::Time p_time = 
         //         FromRos(msg.header.stamp) + 
-        //             ::csmlio::common::FromSeconds(
+        //             ::infinityslam::common::FromSeconds(
         //                 pcl_point_cloud.points.back().time);
-        //     LOG(INFO) << "Convert time format with " << ::csmlio::common::ToSeconds(p_time) 
-        //         << " - " << ::csmlio::common::ToSeconds(FromRos(msg.header.stamp)) 
-        //         << " = " << ::csmlio::common::ToSeconds(p_time - FromRos(msg.header.stamp))
+        //     LOG(INFO) << "Convert time format with " << ::infinityslam::common::ToSeconds(p_time) 
+        //         << " - " << ::infinityslam::common::ToSeconds(FromRos(msg.header.stamp)) 
+        //         << " = " << ::infinityslam::common::ToSeconds(p_time - FromRos(msg.header.stamp))
         //         << ", compared with " << pcl_point_cloud.points.back().time << ".";
         // }
 
         return FromRos(msg.header.stamp) + 
-            ::csmlio::common::FromSeconds(largest_rel_stamp);
+            ::infinityslam::common::FromSeconds(largest_point_time);
     } 
     if (warned_table.find(msg.header.frame_id) == warned_table.end()) {
         LOG(WARNING) << "Found no 'time' field for point cloud message with frame_id '" 
@@ -373,52 +373,5 @@ geometry_msgs::Point ToGeometryMsgPoint(const Eigen::Vector3d& vector3d)
     return point;
 }
 
-std::unique_ptr<nav_msgs::OccupancyGrid> CreateOccupancyGridMsg(
-    const csmlio::io::PaintSubmapSlicesResult& painted_slices,
-    const double resolution, const std::string& frame_id,
-    const ros::Time& time) 
-{
-    auto occupancy_grid = absl::make_unique<nav_msgs::OccupancyGrid>();
-
-    const int width = cairo_image_surface_get_width(painted_slices.surface.get());
-    const int height =
-        cairo_image_surface_get_height(painted_slices.surface.get());
-
-    occupancy_grid->header.stamp = time;
-    occupancy_grid->header.frame_id = frame_id;
-    occupancy_grid->info.map_load_time = time;
-    occupancy_grid->info.resolution = resolution;
-    occupancy_grid->info.width = width;
-    occupancy_grid->info.height = height;
-    occupancy_grid->info.origin.position.x =
-        -painted_slices.origin.x() * resolution;
-    occupancy_grid->info.origin.position.y =
-        (-height + painted_slices.origin.y()) * resolution;
-    occupancy_grid->info.origin.position.z = 0.;
-    occupancy_grid->info.origin.orientation.w = 1.;
-    occupancy_grid->info.origin.orientation.x = 0.;
-    occupancy_grid->info.origin.orientation.y = 0.;
-    occupancy_grid->info.origin.orientation.z = 0.;
-
-    const uint32_t* pixel_data = reinterpret_cast<uint32_t*>(
-        cairo_image_surface_get_data(painted_slices.surface.get()));
-    occupancy_grid->data.reserve(width * height);
-    for (int y = height - 1; y >= 0; --y) {
-        for (int x = 0; x < width; ++x) {
-        const uint32_t packed = pixel_data[y * width + x];
-        const unsigned char color = packed >> 16;
-        const unsigned char observed = packed >> 8;
-        const int value =
-            observed == 0
-                ? -1
-                : ::csmlio::common::RoundToInt((1. - color / 255.) * 100.);
-        CHECK_LE(-1, value);
-        CHECK_GE(100, value);
-        occupancy_grid->data.push_back(value);
-        }
-    }
-
-    return occupancy_grid;
-}
 
 }  // namespace ros_app

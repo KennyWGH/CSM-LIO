@@ -17,51 +17,50 @@
 #ifndef ROS_APP_ROS_MAP_WRITING_POINTS_PROCESSOR_H
 #define ROS_APP_ROS_MAP_WRITING_POINTS_PROCESSOR_H
 
-#include "csmlio/common/lua_parameter_dictionary.h"
-#include "csmlio/io/file_writer.h"
-#include "csmlio/io/points_processor.h"
-#include "csmlio/lio/2d/probability_grid.h"
-#include "csmlio/lio/2d/probability_grid_range_data_inserter_2d.h"
-#include "csmlio/lio/proto/probability_grid_range_data_inserter_options_2d.pb.h"
-#include "csmlio/lio/value_conversion_tables.h"
+#include "infinityslam/io/file_writer.h"
+#include "infinityslam/io/points_processor.h"
+#include "infinityslam/csmlio/2d/probability_grid.h"
+#include "infinityslam/csmlio/2d/probability_grid_range_data_inserter_2d.h"
+#include "infinityslam/csmlio/proto/probability_grid_range_data_inserter_options_2d.pb.h"
+#include "infinityslam/csmlio/value_conversion_tables.h"
 
 namespace ros_app {
 
 // Very similar to Cartographer's ProbabilityGridPointsProcessor, but writes
 // out a PGM and YAML suitable for ROS map server to consume.
 class RosMapWritingPointsProcessor
-    : public ::csmlio::io::PointsProcessor {
+    : public ::infinityslam::io::PointsProcessor {
  public:
-  constexpr static const char* kConfigurationFileActionName = "write_ros_map";
-  RosMapWritingPointsProcessor(
-      double resolution,
-      const ::csmlio::mapping::proto::
-          ProbabilityGridRangeDataInserterOptions2D&
-              range_data_inserter_options,
-      ::csmlio::io::FileWriterFactory file_writer_factory,
-      const std::string& filestem, PointsProcessor* next);
-  RosMapWritingPointsProcessor(const RosMapWritingPointsProcessor&) = delete;
-  RosMapWritingPointsProcessor& operator=(const RosMapWritingPointsProcessor&) =
-      delete;
+    constexpr static const char* kConfigurationFileActionName = "write_ros_map";
+    RosMapWritingPointsProcessor(
+        double resolution,
+        const ::infinityslam::mapping::proto::
+            ProbabilityGridRangeDataInserterOptions2D&
+                range_data_inserter_options,
+        ::infinityslam::io::FileWriterFactory file_writer_factory,
+        const std::string& filestem, PointsProcessor* next);
+    RosMapWritingPointsProcessor(const RosMapWritingPointsProcessor&) = delete;
+    RosMapWritingPointsProcessor& operator=(const RosMapWritingPointsProcessor&) =
+        delete;
 
-  static std::unique_ptr<RosMapWritingPointsProcessor> FromDictionary(
-      ::csmlio::io::FileWriterFactory file_writer_factory,
-      ::csmlio::common::LuaParameterDictionary* dictionary,
-      PointsProcessor* next);
+    //   static std::unique_ptr<RosMapWritingPointsProcessor> FromDictionary(
+    //       ::infinityslam::io::FileWriterFactory file_writer_factory,
+    //       ::infinityslam::common::LuaParameterDictionary* dictionary,
+    //       PointsProcessor* next);
 
-  ~RosMapWritingPointsProcessor() override {}
+    ~RosMapWritingPointsProcessor() override {}
 
-  void Process(std::unique_ptr<::csmlio::io::PointsBatch> batch) override;
-  FlushResult Flush() override;
+    void Process(std::unique_ptr<::infinityslam::io::PointsBatch> batch) override;
+    FlushResult Flush() override;
 
  private:
-  const std::string filestem_;
-  PointsProcessor* const next_;
-  ::csmlio::io::FileWriterFactory file_writer_factory_;
-  ::csmlio::mapping::ProbabilityGridRangeDataInserter2D
-      range_data_inserter_;
-  ::csmlio::mapping::ValueConversionTables conversion_tables_;
-  ::csmlio::mapping::ProbabilityGrid probability_grid_;
+    const std::string filestem_;
+    PointsProcessor* const next_;
+    ::infinityslam::io::FileWriterFactory file_writer_factory_;
+    ::infinityslam::mapping::ProbabilityGridRangeDataInserter2D
+        range_data_inserter_;
+    ::infinityslam::mapping::ValueConversionTables conversion_tables_;
+    ::infinityslam::mapping::ProbabilityGrid probability_grid_;
 };
 
 }  // namespace ros_app

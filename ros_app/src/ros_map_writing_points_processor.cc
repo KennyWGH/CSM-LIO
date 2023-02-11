@@ -17,51 +17,52 @@
 #include "ros_app/src/ros_map_writing_points_processor.h"
 
 #include "absl/memory/memory.h"
-#include "csmlio/io/image.h"
-#include "csmlio/io/probability_grid_points_processor.h"
+#include <boost/make_unique.hpp>
+#include "infinityslam/io/image.h"
+#include "infinityslam/io/probability_grid_points_processor.h"
 #include "ros_app/src/ros_map.h"
 
 namespace ros_app {
 
 RosMapWritingPointsProcessor::RosMapWritingPointsProcessor(
     const double resolution,
-    const ::csmlio::mapping::proto::
+    const ::infinityslam::mapping::proto::
         ProbabilityGridRangeDataInserterOptions2D& range_data_inserter_options,
-    ::csmlio::io::FileWriterFactory file_writer_factory,
+    ::infinityslam::io::FileWriterFactory file_writer_factory,
     const std::string& filestem,
-    ::csmlio::io::PointsProcessor* const next)
+    ::infinityslam::io::PointsProcessor* const next)
     : filestem_(filestem),
       next_(next),
       file_writer_factory_(file_writer_factory),
       range_data_inserter_(range_data_inserter_options),
-      probability_grid_(::csmlio::io::CreateProbabilityGrid(
+      probability_grid_(::infinityslam::io::CreateProbabilityGrid(
           resolution, &conversion_tables_)) {}
 
-std::unique_ptr<RosMapWritingPointsProcessor>
-RosMapWritingPointsProcessor::FromDictionary(
-    ::csmlio::io::FileWriterFactory file_writer_factory,
-    ::csmlio::common::LuaParameterDictionary* const dictionary,
-    ::csmlio::io::PointsProcessor* const next) {
-  return absl::make_unique<RosMapWritingPointsProcessor>(
-      dictionary->GetDouble("resolution"),
-      ::csmlio::mapping::CreateProbabilityGridRangeDataInserterOptions2D(
-          dictionary->GetDictionary("range_data_inserter").get()),
-      file_writer_factory, dictionary->GetString("filestem"), next);
-}
+// std::unique_ptr<RosMapWritingPointsProcessor>
+// RosMapWritingPointsProcessor::FromDictionary(
+//     ::infinityslam::io::FileWriterFactory file_writer_factory,
+//     ::infinityslam::common::LuaParameterDictionary* const dictionary,
+//     ::infinityslam::io::PointsProcessor* const next) {
+//   return boost::make_unique<RosMapWritingPointsProcessor>(
+//       dictionary->GetDouble("resolution"),
+//       ::infinityslam::mapping::CreateProbabilityGridRangeDataInserterOptions2D(
+//           dictionary->GetDictionary("range_data_inserter").get()),
+//       file_writer_factory, dictionary->GetString("filestem"), next);
+// }
 
 void RosMapWritingPointsProcessor::Process(
-    std::unique_ptr<::csmlio::io::PointsBatch> batch) {
+    std::unique_ptr<::infinityslam::io::PointsBatch> batch) {
   range_data_inserter_.Insert(
-      {batch->origin, ::csmlio::sensor::PointCloud(batch->points), {}},
+      {batch->origin, ::infinityslam::sensor::PointCloud(batch->points), {}},
       &probability_grid_);
   next_->Process(std::move(batch));
 }
 
-::csmlio::io::PointsProcessor::FlushResult
+::infinityslam::io::PointsProcessor::FlushResult
 RosMapWritingPointsProcessor::Flush() {
   Eigen::Array2i offset;
-  std::unique_ptr<::csmlio::io::Image> image =
-      ::csmlio::io::DrawProbabilityGrid(probability_grid_, &offset);
+  std::unique_ptr<::infinityslam::io::Image> image =
+      ::infinityslam::io::DrawProbabilityGrid(probability_grid_, &offset);
   if (image != nullptr) {
     auto pgm_writer = file_writer_factory_(filestem_ + ".pgm");
     const std::string pgm_filename = pgm_writer->GetFilename();

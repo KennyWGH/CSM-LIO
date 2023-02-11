@@ -24,13 +24,13 @@
     type="robot_state_publisher" />
 
   <node name="rviz" pkg="rviz" type="rviz" required="true"
-    args="-d $(find csm_lio)/ros_app/rviz/csmlio_universal_ui.rviz" />
+    args="-d $(find csm_lio)/ros_app/rviz/csmlio_ui.rviz" />
 
   <!-- 启动CSM-LIO节点 -->
   <node name="csm_lio_ros_app" pkg="csm_lio"
     type="csm_lio_ros_app" args="
-      -configuration_directory $(find csm_lio)/config
-      -configuration_basename csmlio_config.lua"
+      -ros_config_file $(find csm_lio)/config/ros_config_file.yaml
+      -slam_config_file $(find csm_lio)/config/slam_config_file.yaml"
       output="screen">
     <!-- <remap from="points2_1" to="horizontal_laser_3d" /> -->
     <!-- <remap from="points2_2" to="vertical_laser_3d" /> -->
@@ -49,13 +49,13 @@
   </node>
 
   <!-- 自制数据集 -->
-  <!-- <arg name="bag_filename" default="/home/wgh/wgh_bags/2022-03-31-05-halfAroundBBlock.bag"/> -->
+  <arg name="bag_filename" default="/home/wgh/wgh_bags/2022-03-31-05-halfAroundBBlock.bag"/>
 
   <!-- UrbanLoc数据集 -->
   <!-- <arg name="bag_filename" default="/home/wgh/wgh_bags/HK-Data20190117.bag"/> -->
 
   <!-- UrbanNav数据集 -->
-  <arg name="bag_filename" default="/home/wgh/wgh_bags/urbanNav/UrbanNav-HK_TST-20210517_sensors.bag"/>
+  <!-- <arg name="bag_filename" default="/home/wgh/wgh_bags/urbanNav/UrbanNav-HK_TST-20210517_sensors.bag"/> -->
 
   <!-- M2DGR数据集 -->
   <!-- <arg name="bag_filename" default="/home/wgh/wgh_bags/M2DGR/rotation_01.bag"/> -->
@@ -66,3 +66,11 @@
   <node name="playbag" pkg="rosbag" type="play"
     args="--clock -s 0 -r 1.0 $(arg bag_filename)" />
 </launch>
+
+
+
+
+
+
+      <!-- -configuration_directory $(find csm_lio)/config
+      -configuration_basename slam_config.lua -->

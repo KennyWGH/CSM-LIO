@@ -21,18 +21,18 @@
 #include <string>
 #include <vector>
 
-#include "csmlio/io/image.h"
-#include "csmlio/io/submap_painter.h"
-#include "csmlio/lio/id.h"
-#include "csmlio/transform/rigid_transform.h"
+#include "infinityslam/io/image.h"
+#include "infinityslam/io/submap_painter.h"
+#include "infinityslam/csmlio/id.h"
+#include "infinityslam/transform/rigid_transform.h"
 #include "ros/ros.h"
 
 namespace ros_app {
 
 // Fetch 'submap_id' using the 'client' and returning the response or 'nullptr'
 // on error.
-std::unique_ptr<::csmlio::io::SubmapTextures> FetchSubmapTextures(
-    const ::csmlio::mapping::SubmapId& submap_id,
+std::unique_ptr<::infinityslam::io::SubmapTextures> FetchSubmapTextures(
+    const ::infinityslam::mapping::SubmapId& submap_id,
     ros::ServiceClient* client);
 
 }  // namespace ros_app
