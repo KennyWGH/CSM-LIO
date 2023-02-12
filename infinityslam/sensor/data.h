@@ -20,8 +20,8 @@
  * Licensed under the Apache License, Version 2.0 (the "License").
 */
 
-#ifndef CSMLIO_MAPPING_DATA_H_
-#define CSMLIO_MAPPING_DATA_H_
+#ifndef INFINITYSLAM_CSMLIO_DATA_H_
+#define INFINITYSLAM_CSMLIO_DATA_H_
 
 #include <boost/make_unique.hpp>
 #include "glog/logging.h"
@@ -30,7 +30,7 @@
 
 namespace infinityslam {
 
-namespace mapping {
+namespace csmlio {
 class CSMLioInterface;
 }
 
@@ -43,9 +43,7 @@ class Data {
 
     virtual common::Time GetTime() const = 0;
     const std::string &GetSensorId() const { return sensor_id_; }
-    // virtual void AddToTrajectoryBuilder(
-    //     mapping::TrajectoryBuilderInterface *trajectory_builder) = 0;
-    virtual void AddToLIO(mapping::CSMLioInterface* lio_owner) = 0;
+    virtual void AddToLIO(csmlio::CSMLioInterface* lio_owner) = 0;
 
   protected:
     const std::string sensor_id_;
@@ -54,4 +52,4 @@ class Data {
 }  // namespace sensor
 }  // namespace infinityslam
 
-#endif  // CSMLIO_MAPPING_DATA_H_
+#endif  // INFINITYSLAM_CSMLIO_DATA_H_

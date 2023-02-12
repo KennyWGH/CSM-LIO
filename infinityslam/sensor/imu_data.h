@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef CSMLIO_SENSOR_IMU_DATA_H_
-#define CSMLIO_SENSOR_IMU_DATA_H_
+#ifndef INFINITYSLAM_SENSOR_IMU_DATA_H_
+#define INFINITYSLAM_SENSOR_IMU_DATA_H_
 
 #include "Eigen/Core"
 #include "infinityslam/common/time.h"
@@ -34,4 +34,4 @@ struct ImuData {
 }  // namespace sensor
 }  // namespace infinityslam
 
-#endif  // CSMLIO_SENSOR_IMU_DATA_H_
+#endif  // INFINITYSLAM_SENSOR_IMU_DATA_H_

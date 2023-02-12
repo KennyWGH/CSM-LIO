@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef CSMLIO_IO_POINTS_BATCH_H_
-#define CSMLIO_IO_POINTS_BATCH_H_
+#ifndef INFINITYSLAM_IO_POINTS_BATCH_H_
+#define INFINITYSLAM_IO_POINTS_BATCH_H_
 
 #include <array>
 #include <cstdint>
@@ -69,4 +69,4 @@ void RemovePoints(absl::flat_hash_set<int> to_remove, PointsBatch* batch);
 }  // namespace io
 }  // namespace infinityslam
 
-#endif  // CSMLIO_IO_POINTS_BATCH_H_
+#endif  // INFINITYSLAM_IO_POINTS_BATCH_H_

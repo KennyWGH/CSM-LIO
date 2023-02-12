@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef CSMLIO_SENSOR_INTERNAL_VOXEL_FILTER_H_
-#define CSMLIO_SENSOR_INTERNAL_VOXEL_FILTER_H_
+#ifndef INFINITYSLAM_SENSOR_INTERNAL_VOXEL_FILTER_H_
+#define INFINITYSLAM_SENSOR_INTERNAL_VOXEL_FILTER_H_
 
 #include <bitset>
 
@@ -64,4 +64,4 @@ PointCloud AdaptiveVoxelFilter(
 }  // namespace sensor
 }  // namespace infinityslam
 
-#endif  // CSMLIO_SENSOR_INTERNAL_VOXEL_FILTER_H_
+#endif  // INFINITYSLAM_SENSOR_INTERNAL_VOXEL_FILTER_H_

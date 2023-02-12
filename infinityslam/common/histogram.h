@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef CSMLIO_COMMON_HISTOGRAM_H_
-#define CSMLIO_COMMON_HISTOGRAM_H_
+#ifndef INFINITYSLAM_COMMON_HISTOGRAM_H_
+#define INFINITYSLAM_COMMON_HISTOGRAM_H_
 
 #include <string>
 #include <vector>
@@ -37,4 +37,4 @@ class Histogram {
 }  // namespace common
 }  // namespace infinityslam
 
-#endif  // CSMLIO_COMMON_HISTOGRAM_H_
+#endif  // INFINITYSLAM_COMMON_HISTOGRAM_H_

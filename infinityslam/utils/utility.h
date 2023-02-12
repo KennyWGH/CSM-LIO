@@ -1,5 +1,5 @@
-#ifndef CSMLIO_UTILS_UTILITY_H_
-#define CSMLIO_UTILS_UTILITY_H_
+#ifndef INFINITYSLAM_UTILS_UTILITY_H_
+#define INFINITYSLAM_UTILS_UTILITY_H_
 
 #include <cmath>
 #include <cstdlib>
@@ -60,4 +60,4 @@ bool InterpolatePoseTable(const common::Time& start_time,
 } // namespace infinityslam
 
 
-#endif // CSMLIO_UTILS_UTILITY_H_
+#endif // INFINITYSLAM_UTILS_UTILITY_H_

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef CSMLIO_COMMON_TASK_H_
-#define CSMLIO_COMMON_TASK_H_
+#ifndef INFINITYSLAM_COMMON_TASK_H_
+#define INFINITYSLAM_COMMON_TASK_H_
 
 #include <set>
 
@@ -73,4 +73,4 @@ class Task {
 }  // namespace common
 }  // namespace infinityslam
 
-#endif  // CSMLIO_COMMON_TASK_H_
+#endif  // INFINITYSLAM_COMMON_TASK_H_

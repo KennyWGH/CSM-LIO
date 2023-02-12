@@ -2,8 +2,8 @@
  * Copyright 2022 WANG Guanhua (wangxxx@gmail.com)
 */
 
-#ifndef CSMLIO_MAPPING_CSM_LIDAR_INERTIAL_ODOMETRY_H_
-#define CSMLIO_MAPPING_CSM_LIDAR_INERTIAL_ODOMETRY_H_
+#ifndef INFINITYSLAM_CSMLIO_CSM_LIDAR_INERTIAL_ODOMETRY_H_
+#define INFINITYSLAM_CSMLIO_CSM_LIDAR_INERTIAL_ODOMETRY_H_
 
 #include <string>
 #include <cmath>
@@ -20,7 +20,7 @@
 #include "infinityslam/common/time.h"
 #include "infinityslam/common/optional.h"
 #include "infinityslam/common/thread_pool.h"
-#include "infinityslam/common/internal/rate_timer.h"
+#include "infinityslam/common/rate_timer.h"
 #include "infinityslam/common/system_options.h"
 #include "infinityslam/sensor/data.h"
 #include "infinityslam/sensor/imu_data.h"
@@ -35,19 +35,19 @@
 #include "infinityslam/sensor/internal/trajectory_collator.h"
 #include "infinityslam/transform/rigid_transform.h"
 #include "infinityslam/utils/utility.h"
-#include "infinityslam/csmlio/submaps.h"
-#include "infinityslam/csmlio/3d/submap_3d.h"
-#include "infinityslam/csmlio/internal/3d/scan_matching/ceres_scan_matcher_3d.h"
-#include "infinityslam/csmlio/internal/3d/scan_matching/real_time_correlative_scan_matcher_3d.h"
-#include "infinityslam/csmlio/internal/motion_filter.h"
-#include "infinityslam/csmlio/internal/range_data_collator.h"
-#include "infinityslam/csmlio/pose_extrapolator_interface.h"
+#include "infinityslam/csmlio/submap/submaps.h"
+#include "infinityslam/csmlio/submap/submap_3d.h"
+#include "infinityslam/csmlio/scan_matching/ceres_scan_matcher_3d.h"
+#include "infinityslam/csmlio/scan_matching/real_time_correlative_scan_matcher_3d.h"
+#include "infinityslam/csmlio/pose_extrapolator/pose_extrapolator_interface.h"
+#include "infinityslam/csmlio/tools/motion_filter.h"
+#include "infinityslam/csmlio/range_data_collator.h"
 #include "infinityslam/csmlio/trajectory_node.h"
 #include "infinityslam/csmlio/csm_lio_type_def.h"
 #include "infinityslam/csmlio/csm_lio_interface.h"
 
 namespace infinityslam {
-namespace mapping {
+namespace csmlio {
 
 struct CSMLioOptions {
     bool collate_fixed_frame = true;
@@ -98,15 +98,15 @@ CSMLioOptions ReadCSMLioOptions();
 
 class CSMLidarInertialOdometry : public CSMLioInterface {
   public:
-    using SensorId = mapping::SensorId;
-    using MatchingResult = mapping::MatchingResult;
-    using InsertionResult = mapping::InsertionResult;
-    using TrajectoryNode = mapping::TrajectoryNode;
+    // using SensorId = mapp ing::SensorId;
+    // using MatchingResult = mapp ing::MatchingResult;
+    // using InsertionResult = mapp ing::InsertionResult;
+    // using TrajectoryNode = mappi ng::TrajectoryNode;
 
     CSMLidarInertialOdometry(
         const CSMLioOptions& csm_lio_options,
-        const std::set<mapping::SensorId>& expected_sensor_ids,
-        mapping::LioResultCallback lio_result_callback);
+        const std::set<csmlio::SensorId>& expected_sensor_ids,
+        csmlio::LioResultCallback lio_result_callback);
 
     ~CSMLidarInertialOdometry();
 
@@ -192,18 +192,18 @@ class CSMLidarInertialOdometry : public CSMLioInterface {
     std::unique_ptr<sensor::CollatorInterface> sensor_collator_;
 
     // CSMLIO 核心成员。
-    mapping::ActiveSubmaps3D active_submaps_;
+    csmlio::ActiveSubmaps3D active_submaps_;
     std::shared_ptr<sensor::PointCloud> submap_cloud_growing_; //最新的
     std::shared_ptr<sensor::PointCloud> submap_cloud_working_; //此新的
     std::shared_ptr<sensor::PointCloud> submap_cloud_all_;     //所有的
     mutable bool active_submaps_updated = false;
 
-    mapping::MotionFilter motion_filter_;
-    std::unique_ptr<mapping::scan_matching::RealTimeCorrelativeScanMatcher3D>
+    csmlio::MotionFilter motion_filter_;
+    std::unique_ptr<csmlio::scan_matching::RealTimeCorrelativeScanMatcher3D>
         real_time_correlative_scan_matcher_;
-    std::unique_ptr<mapping::scan_matching::CeresScanMatcher3D> ceres_scan_matcher_;
+    std::unique_ptr<csmlio::scan_matching::CeresScanMatcher3D> ceres_scan_matcher_;
 
-    std::unique_ptr<mapping::PoseExtrapolatorInterface> extrapolator_;
+    std::unique_ptr<csmlio::PoseExtrapolatorInterface> extrapolator_;
 
     int num_accumulated_ = 0;
     std::vector<sensor::TimedPointCloudOriginData>
@@ -212,12 +212,12 @@ class CSMLidarInertialOdometry : public CSMLioInterface {
 
     common::optional<double> last_thread_cpu_time_seconds_;
 
-    mapping::RangeDataCollator range_data_collator_;
+    csmlio::RangeDataCollator range_data_collator_;
 
     common::optional<common::Time> last_sensor_time_;
 
     // 来自Global类的成员，对外输出信息的回调。
-    mapping::LioResultCallback lio_result_callback_;
+    csmlio::LioResultCallback lio_result_callback_;
 
     // 来自Collated类的成员。
     const int trajectory_id_ = 0; //原版Collator注册sensor需要指定一个轨迹ID。
@@ -266,8 +266,8 @@ class CSMLidarInertialOdometry : public CSMLioInterface {
 
 };
 
-} // namespace mapping
+} // namespace csmlio
 } // namespace infinityslam
 
 
-#endif // CSMLIO_MAPPING_CSM_LIDAR_INERTIAL_ODOMETRY_H_
+#endif // INFINITYSLAM_CSMLIO_CSM_LIDAR_INERTIAL_ODOMETRY_H_

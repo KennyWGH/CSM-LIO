@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef CSMLIO_MAPPING_ID_H_
-#define CSMLIO_MAPPING_ID_H_
+#ifndef INFINITYSLAM_CSMLIO_ID_H_
+#define INFINITYSLAM_CSMLIO_ID_H_
 
 #include <algorithm>
 #include <iostream>
@@ -33,7 +33,7 @@
 #include "glog/logging.h"
 
 namespace infinityslam {
-namespace mapping {
+namespace csmlio {
 namespace internal {
 
 template <class T>
@@ -71,11 +71,6 @@ struct NodeId {
     return std::forward_as_tuple(trajectory_id, node_index) <
            std::forward_as_tuple(other.trajectory_id, other.node_index);
   }
-
-  // void ToProto(proto::NodeId* proto) const {
-  //   proto->set_trajectory_id(trajectory_id);
-  //   proto->set_node_index(node_index);
-  // }
 };
 
 inline std::ostream& operator<<(std::ostream& os, const NodeId& v) {
@@ -102,11 +97,6 @@ struct SubmapId {
     return std::forward_as_tuple(trajectory_id, submap_index) <
            std::forward_as_tuple(other.trajectory_id, other.submap_index);
   }
-
-  // void ToProto(proto::SubmapId* proto) const {
-  //   proto->set_trajectory_id(trajectory_id);
-  //   proto->set_submap_index(submap_index);
-  // }
 };
 
 inline std::ostream& operator<<(std::ostream& os, const SubmapId& v) {
@@ -416,7 +406,7 @@ class MapById {
   std::map<int, MapByIndex> trajectories_;
 };
 
-}  // namespace mapping
+}  // namespace csmlio
 }  // namespace infinityslam
 
-#endif  // CSMLIO_MAPPING_ID_H_
+#endif  // INFINITYSLAM_CSMLIO_ID_H_

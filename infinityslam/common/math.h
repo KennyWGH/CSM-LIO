@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef CSMLIO_COMMON_MATH_H_
-#define CSMLIO_COMMON_MATH_H_
+#ifndef INFINITYSLAM_COMMON_MATH_H_
+#define INFINITYSLAM_COMMON_MATH_H_
 
 #include <cmath>
 #include <vector>
@@ -83,4 +83,4 @@ inline void QuaternionProduct(const double* const z, const T* const w,
 }  // namespace common
 }  // namespace infinityslam
 
-#endif  // CSMLIO_COMMON_MATH_H_
+#endif  // INFINITYSLAM_COMMON_MATH_H_

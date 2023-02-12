@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef CSMLIO_SENSOR_INTERNAL_TRAJECTORY_COLLATOR_H_
-#define CSMLIO_SENSOR_INTERNAL_TRAJECTORY_COLLATOR_H_
+#ifndef INFINITYSLAM_SENSOR_INTERNAL_TRAJECTORY_COLLATOR_H_
+#define INFINITYSLAM_SENSOR_INTERNAL_TRAJECTORY_COLLATOR_H_
 
 #include <memory>
 #include <vector>
@@ -75,4 +75,4 @@ class TrajectoryCollator : public CollatorInterface {
 }  // namespace sensor
 }  // namespace infinityslam
 
-#endif  // CSMLIO_SENSOR_INTERNAL_TRAJECTORY_COLLATOR_H_
+#endif  // INFINITYSLAM_SENSOR_INTERNAL_TRAJECTORY_COLLATOR_H_

@@ -21,8 +21,8 @@
 #include "infinityslam/io/points_processor.h"
 #include "infinityslam/csmlio/2d/probability_grid.h"
 #include "infinityslam/csmlio/2d/probability_grid_range_data_inserter_2d.h"
-#include "infinityslam/csmlio/proto/probability_grid_range_data_inserter_options_2d.pb.h"
-#include "infinityslam/csmlio/value_conversion_tables.h"
+// #include "infinityslam/csmlio/proto/probability_grid_range_data_inserter_options_2d.pb.h"
+#include "infinityslam/csmlio/tools/value_conversion_tables.h"
 
 namespace ros_app {
 
@@ -34,7 +34,7 @@ class RosMapWritingPointsProcessor
     constexpr static const char* kConfigurationFileActionName = "write_ros_map";
     RosMapWritingPointsProcessor(
         double resolution,
-        const ::infinityslam::mapping::proto::
+        const ::infinityslam::csmlio::proto::
             ProbabilityGridRangeDataInserterOptions2D&
                 range_data_inserter_options,
         ::infinityslam::io::FileWriterFactory file_writer_factory,
@@ -57,10 +57,10 @@ class RosMapWritingPointsProcessor
     const std::string filestem_;
     PointsProcessor* const next_;
     ::infinityslam::io::FileWriterFactory file_writer_factory_;
-    ::infinityslam::mapping::ProbabilityGridRangeDataInserter2D
+    ::infinityslam::csmlio::ProbabilityGridRangeDataInserter2D
         range_data_inserter_;
-    ::infinityslam::mapping::ValueConversionTables conversion_tables_;
-    ::infinityslam::mapping::ProbabilityGrid probability_grid_;
+    ::infinityslam::csmlio::ValueConversionTables conversion_tables_;
+    ::infinityslam::csmlio::ProbabilityGrid probability_grid_;
 };
 
 }  // namespace ros_app

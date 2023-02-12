@@ -14,16 +14,16 @@
 #include "infinityslam/common/system_options.h"
 #include "infinityslam/sensor/internal/dispatchable.h"
 #include "infinityslam/transform/timestamped_transform.h"
-#include "infinityslam/csmlio/internal/3d/scan_matching/rotational_scan_matcher.h"
+#include "infinityslam/csmlio/scan_matching/rotational_scan_matcher.h"
 
 namespace infinityslam {
-namespace mapping {
+namespace csmlio {
 
-using namespace ::infinityslam::mapping;
+// using namespace ::infinityslam::csmlio;
 
 namespace {
 
-using SensorId = mapping::SensorId;
+// using SensorId = mapp ing::SensorId;
 
 std::vector<std::string> SelectRangeSensorIds(
     const std::set<SensorId>& expected_sensor_ids) 
@@ -70,11 +70,11 @@ CSMLioOptions ReadCSMLioOptions() {
 CSMLidarInertialOdometry::CSMLidarInertialOdometry(
     const CSMLioOptions& csm_lio_options,
     const std::set<SensorId>& expected_sensor_ids,
-    mapping::LioResultCallback lio_result_callback)
+    csmlio::LioResultCallback lio_result_callback)
     : csm_lio_Options_(csm_lio_options)
-    , active_submaps_(mapping::ReadActiveSubmaps3DOptions())
-    , motion_filter_(mapping::ReadMotionFIlterOpTions())
-    , ceres_scan_matcher_(mapping::scan_matching::CreateCeresScanMatcher3D())
+    , active_submaps_(csmlio::ReadActiveSubmaps3DOptions())
+    , motion_filter_(csmlio::ReadMotionFIlterOpTions())
+    , ceres_scan_matcher_(csmlio::scan_matching::CreateCeresScanMatcher3D())
     , range_data_collator_(SelectRangeSensorIds(expected_sensor_ids))
     , lio_result_callback_(lio_result_callback)
     , last_logging_time_(std::chrono::steady_clock::now())
@@ -85,7 +85,7 @@ CSMLidarInertialOdometry::CSMLidarInertialOdometry(
     submap_cloud_all_.reset(new sensor::PointCloud);
     if (csm_lio_Options_.use_online_correlative_scan_matching) {
         real_time_correlative_scan_matcher_ = 
-            mapping::scan_matching::CreateRealTimeCorrelativeScanMatcher3D();
+            csmlio::scan_matching::CreateRealTimeCorrelativeScanMatcher3D();
     }
 
     sensor_collator_ = boost::make_unique<sensor::Collator>(); 
@@ -228,7 +228,7 @@ void CSMLidarInertialOdometry::ProcessSensorData(
 
     // 在出现新关键帧时，打印日志。
     if (matching_result->insertion_result != nullptr) {
-        LOG(INFO) << "Lio pipeline took [" << std::fixed << std::setprecision(3)
+        LOG(INFO) << "## Lio pipeline took [" << std::fixed << std::setprecision(3)
             << proc_point_cloud_duration << "s, avg " 
             << duration_keeper_.GetRecentAvgDuration() 
             << "s], inserted [kf_id=" << slam_keyframes_data_.back().node_id
@@ -266,7 +266,7 @@ void CSMLidarInertialOdometry::ProcessSensorData(
     initial_imu_data.push_back(imu_data);
 
     // 构造&初始化对象。
-    extrapolator_ = mapping::PoseExtrapolatorInterface::CreateWithImuData(
+    extrapolator_ = csmlio::PoseExtrapolatorInterface::CreateWithImuData(
         initial_imu_data, initial_poses, /*init_with_common_options=*/ true);
 
 }
@@ -316,8 +316,8 @@ CSMLidarInertialOdometry::GetActiveSubmapCloudsList() {
             // 无需二合一，把working的submap的点云数据拷贝一下
             submap_cloud_all_->clear();
             *submap_cloud_all_ = *submap_cloud_working_;
-            LOG(INFO) << "## Updated submap list cloud: working submap cloud has " 
-                << submap_cloud_working_->size() << " points.";
+            LOG(INFO) << "Updated submap list: working submap cloud size " 
+                << submap_cloud_working_->size() << ".";
             // done.
             active_submaps_updated = false;
             return std::vector<std::shared_ptr<const sensor::PointCloud>> {
@@ -401,7 +401,7 @@ void CSMLidarInertialOdometry::LogLioStatus()
         << " ** ************************* ** ";
 }
 
-std::unique_ptr<mapping::MatchingResult>
+std::unique_ptr<csmlio::MatchingResult>
 CSMLidarInertialOdometry::AddRangeData(
     const std::string& sensor_id,
     const sensor::TimedPointCloudData& unsynchronized_data) 
@@ -582,7 +582,7 @@ CSMLidarInertialOdometry::AddRangeData(
         extrapolation_result.gravity_from_tracking);
 }
 
-std::unique_ptr<mapping::MatchingResult>
+std::unique_ptr<csmlio::MatchingResult>
 CSMLidarInertialOdometry::AddAccumulatedRangeData(
     const common::Time time,
     const sensor::RangeData& filtered_range_data_in_tracking,
@@ -690,7 +690,7 @@ CSMLidarInertialOdometry::AddAccumulatedRangeData(
         std::move(insertion_result)});
 }
 
-std::unique_ptr<mapping::InsertionResult>
+std::unique_ptr<csmlio::InsertionResult>
 CSMLidarInertialOdometry::InsertIntoSubmap(
     const common::Time time,
     const sensor::RangeData& filtered_range_data_in_local,
@@ -704,7 +704,7 @@ CSMLidarInertialOdometry::InsertIntoSubmap(
         return nullptr;
     }
     const Eigen::VectorXf rotational_scan_matcher_histogram_in_gravity =
-        mapping::scan_matching::RotationalScanMatcher::ComputeHistogram(
+        csmlio::scan_matching::RotationalScanMatcher::ComputeHistogram(
             sensor::TransformPointCloud(
                 filtered_range_data_in_tracking.returns,
                 transform::Rigid3f::Rotation(gravity_alignment.cast<float>())),
@@ -712,13 +712,13 @@ CSMLidarInertialOdometry::InsertIntoSubmap(
 
     const Eigen::Quaterniond local_from_gravity_aligned =
         pose_estimate.rotation() * gravity_alignment.inverse();
-    std::vector<std::shared_ptr<const mapping::Submap3D>> insertion_submaps =
+    std::vector<std::shared_ptr<const csmlio::Submap3D>> insertion_submaps =
         active_submaps_.InsertData(filtered_range_data_in_local,
                                     local_from_gravity_aligned,
                                     rotational_scan_matcher_histogram_in_gravity);
     return boost::make_unique<InsertionResult>(
-        InsertionResult{std::make_shared<const mapping::TrajectoryNode::Data>(
-                            mapping::TrajectoryNode::Data{
+        InsertionResult{std::make_shared<const csmlio::TrajectoryNode::Data>(
+                            csmlio::TrajectoryNode::Data{
                                 time,
                                 gravity_alignment,
                                 {},  // 'filtered_point_cloud' is only used in 2D.
@@ -737,7 +737,7 @@ std::unique_ptr<transform::Rigid3d> CSMLidarInertialOdometry::ScanMatch(
     if (active_submaps_.submaps().empty()) {
         return boost::make_unique<transform::Rigid3d>(pose_prediction);
     }
-    std::shared_ptr<const mapping::Submap3D> matching_submap =
+    std::shared_ptr<const csmlio::Submap3D> matching_submap =
         active_submaps_.submaps().front();
     transform::Rigid3d initial_ceres_pose =
         matching_submap->local_pose().inverse() * pose_prediction;
@@ -782,5 +782,5 @@ std::unique_ptr<transform::Rigid3d> CSMLidarInertialOdometry::ScanMatch(
 
 
 
-} // namespace mapping
+} // namespace csmlio
 } // namespace infinityslam

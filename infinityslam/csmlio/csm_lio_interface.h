@@ -2,8 +2,8 @@
  * Copyright 2022 WANG Guanhua (wangxxx@gmail.com)
 */
 
-#ifndef CSMLIO_MAPPING_CSM_LIO_INTERFACE_H_
-#define CSMLIO_MAPPING_CSM_LIO_INTERFACE_H_
+#ifndef INFINITYSLAM_CSMLIO_CSM_LIO_INTERFACE_H_
+#define INFINITYSLAM_CSMLIO_CSM_LIO_INTERFACE_H_
 
 #include <string>
 #include "infinityslam/sensor/timed_point_cloud_data.h"
@@ -11,7 +11,7 @@
 #include "infinityslam/sensor/odometry_data.h"
 
 namespace infinityslam {
-namespace mapping {
+namespace csmlio {
 
 class CSMLioInterface {
   public:
@@ -36,11 +36,11 @@ class CSMLioInterface {
 
 };
 
-} // namespace mapping
+} // namespace csmlio
 } // namespace infinityslam
 
 
 
 
 
-#endif // CSMLIO_MAPPING_CSM_LIO_INTERFACE_H_
+#endif // INFINITYSLAM_CSMLIO_CSM_LIO_INTERFACE_H_

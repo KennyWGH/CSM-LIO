@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef CSMLIO_COMMON_FIXED_RATIO_SAMPLER_H_
-#define CSMLIO_COMMON_FIXED_RATIO_SAMPLER_H_
+#ifndef INFINITYSLAM_COMMON_FIXED_RATIO_SAMPLER_H_
+#define INFINITYSLAM_COMMON_FIXED_RATIO_SAMPLER_H_
 
 #include <string>
 
@@ -52,4 +52,4 @@ class FixedRatioSampler {
 }  // namespace common
 }  // namespace infinityslam
 
-#endif  // CSMLIO_COMMON_FIXED_RATIO_SAMPLER_H_
+#endif  // INFINITYSLAM_COMMON_FIXED_RATIO_SAMPLER_H_

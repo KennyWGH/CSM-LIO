@@ -4,8 +4,8 @@
  * Licensed under the Apache License, Version 2.0 (the "License").
 */
 
-#ifndef CSMLIO_SENSOR_INTERNAL_COLLATOR_H_
-#define CSMLIO_SENSOR_INTERNAL_COLLATOR_H_
+#ifndef INFINITYSLAM_SENSOR_INTERNAL_COLLATOR_H_
+#define INFINITYSLAM_SENSOR_INTERNAL_COLLATOR_H_
 
 #include <functional>
 #include <memory>
@@ -53,4 +53,4 @@ class Collator : public CollatorInterface {
 }  // namespace sensor
 }  // namespace infinityslam
 
-#endif  // CSMLIO_SENSOR_INTERNAL_COLLATOR_H_
+#endif  // INFINITYSLAM_SENSOR_INTERNAL_COLLATOR_H_

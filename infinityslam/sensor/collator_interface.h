@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef CSMLIO_SENSOR_COLLATOR_INTERFACE_H_
-#define CSMLIO_SENSOR_COLLATOR_INTERFACE_H_
+#ifndef INFINITYSLAM_SENSOR_COLLATOR_INTERFACE_H_
+#define INFINITYSLAM_SENSOR_COLLATOR_INTERFACE_H_
 
 #include <functional>
 #include <memory>
@@ -68,4 +68,4 @@ class CollatorInterface {
 }  // namespace sensor
 }  // namespace infinityslam
 
-#endif  // CSMLIO_SENSOR_COLLATOR_INTERFACE_H_
+#endif  // INFINITYSLAM_SENSOR_COLLATOR_INTERFACE_H_

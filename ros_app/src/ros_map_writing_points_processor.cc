@@ -26,7 +26,7 @@ namespace ros_app {
 
 RosMapWritingPointsProcessor::RosMapWritingPointsProcessor(
     const double resolution,
-    const ::infinityslam::mapping::proto::
+    const ::infinityslam::csmlio::proto::
         ProbabilityGridRangeDataInserterOptions2D& range_data_inserter_options,
     ::infinityslam::io::FileWriterFactory file_writer_factory,
     const std::string& filestem,
@@ -45,7 +45,7 @@ RosMapWritingPointsProcessor::RosMapWritingPointsProcessor(
 //     ::infinityslam::io::PointsProcessor* const next) {
 //   return boost::make_unique<RosMapWritingPointsProcessor>(
 //       dictionary->GetDouble("resolution"),
-//       ::infinityslam::mapping::CreateProbabilityGridRangeDataInserterOptions2D(
+//       ::infinityslam::csmlio::CreateProbabilityGridRangeDataInserterOptions2D(
 //           dictionary->GetDictionary("range_data_inserter").get()),
 //       file_writer_factory, dictionary->GetString("filestem"), next);
 // }

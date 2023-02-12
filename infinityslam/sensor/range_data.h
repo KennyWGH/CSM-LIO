@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef CSMLIO_SENSOR_RANGE_DATA_H_
-#define CSMLIO_SENSOR_RANGE_DATA_H_
+#ifndef INFINITYSLAM_SENSOR_RANGE_DATA_H_
+#define INFINITYSLAM_SENSOR_RANGE_DATA_H_
 
 #include "infinityslam/common/port.h"
 // #include "infinityslam/sensor/compressed_point_cloud.h"
@@ -44,4 +44,4 @@ RangeData CropRangeData(const RangeData& range_data, float min_z, float max_z);
 }  // namespace sensor
 }  // namespace infinityslam
 
-#endif  // CSMLIO_SENSOR_RANGE_DATA_H_
+#endif  // INFINITYSLAM_SENSOR_RANGE_DATA_H_

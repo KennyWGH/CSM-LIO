@@ -52,7 +52,7 @@ namespace {
 
 using ::infinityslam::io::PaintSubmapSlicesResult;
 using ::infinityslam::io::SubmapSlice;
-using ::infinityslam::mapping::SubmapId;
+using ::infinityslam::csmlio::SubmapId;
 
 class Node {
  public:

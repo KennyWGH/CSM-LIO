@@ -37,6 +37,7 @@
 #include "ros_app/src/ros_wrapper.h"
 #include "ros_app/src/ros_wrapper_options.h"
 #include "ros_app/src/ros_log_sink.h"
+#include "ros_app/src/tmp_test.h"
 
 #include "infinityslam/csmlio/csm_lidar_inertial_odometry.h"
 
@@ -70,35 +71,6 @@ void Run()
     // node.FinishAllTrajectories();
     // node.RunFinalOptimization();
 
-}
-
-void ConvertSO3ToRPY() {
-    // data: [ 2.67949e-08, -1,  0, 0,
-    //         1,  2.67949e-08,  0, 0,
-    //         0,  0,  1, -0.28, 
-    //         0., 0., 0., 1 ] 
-
-    Eigen::Matrix3d so3;
-    so3(0,0) = 2.67949e-08; so3(0,1) = -1;          so3(0,2) = 0;
-    so3(1,0) = 1;           so3(1,1) = 2.67949e-08; so3(1,2) = 0;
-    so3(2,0) = 0;           so3(2,1) = 0;           so3(2,2) = 1;
-    LOG(INFO) << "Calculating transform ... \n" 
-        << "From so3 to roll/pitch/yaw: \n" 
-        << so3.eulerAngles(0,1,2) << " \n"
-        << "From so3.inv to roll/pitch/yaw: \n" 
-        << so3.inverse().eulerAngles(0,1,2)
-        << "From so3.inv to roll/pitch/yaw (transpose): " 
-        << so3.inverse().eulerAngles(0,1,2).transpose();
-
-    Eigen::Vector3i vec3i {3,4,5};
-    LOG(INFO) << "vector3i test: \n" 
-        // << std::fixed << std::setprecision(2) 
-        << vec3i << "\n" << vec3i + Eigen::Vector3i::Ones(); 
-    LOG(INFO) << "vector3i test for vector3f: \n" 
-        // << std::fixed << std::setprecision(2) 
-        << vec3i.cast<float>() << "\n" << vec3i.cast<float>() + 0.7958154f * Eigen::Vector3f::Ones(); 
-    LOG(INFO) << "vector3i test2 for vector3f: \n" 
-        << (vec3i + Eigen::Vector3i::Ones()) * 3 << "\n" << (vec3i + Eigen::Vector3i::Ones()).cast<float>() * 1.111; 
 }
 
 } // namespace

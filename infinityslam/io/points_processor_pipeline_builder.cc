@@ -64,7 +64,7 @@
 
 // template <typename PointsProcessorType>
 // void RegisterFileWritingPointsProcessorWithTrajectories(
-//     const std::vector<mapping::proto::Trajectory>& trajectories,
+//     const std::vector<csmlio::proto::Trajectory>& trajectories,
 //     const FileWriterFactory& file_writer_factory,
 //     PointsProcessorPipelineBuilder* const builder) {
 //   builder->Register(
@@ -78,7 +78,7 @@
 // }
 
 // void RegisterBuiltInPointsProcessors(
-//     const std::vector<mapping::proto::Trajectory>& trajectories,
+//     const std::vector<csmlio::proto::Trajectory>& trajectories,
 //     const FileWriterFactory& file_writer_factory,
 //     PointsProcessorPipelineBuilder* builder) {
 //   RegisterPlainPointsProcessor<CountingPointsProcessor>(builder);

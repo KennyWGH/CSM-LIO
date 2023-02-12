@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef CSMLIO_SENSOR_ODOMETRY_DATA_H_
-#define CSMLIO_SENSOR_ODOMETRY_DATA_H_
+#ifndef INFINITYSLAM_SENSOR_ODOMETRY_DATA_H_
+#define INFINITYSLAM_SENSOR_ODOMETRY_DATA_H_
 
 #include "infinityslam/common/time.h"
 #include "infinityslam/transform/rigid_transform.h"
@@ -32,4 +32,4 @@ struct OdometryData {
 }  // namespace sensor
 }  // namespace infinityslam
 
-#endif  // CSMLIO_SENSOR_ODOMETRY_DATA_H_
+#endif  // INFINITYSLAM_SENSOR_ODOMETRY_DATA_H_

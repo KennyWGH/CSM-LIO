@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef CSMLIO_IO_FILE_WRITER_H_
-#define CSMLIO_IO_FILE_WRITER_H_
+#ifndef INFINITYSLAM_IO_FILE_WRITER_H_
+#define INFINITYSLAM_IO_FILE_WRITER_H_
 
 #include <fstream>
 #include <functional>
@@ -68,4 +68,4 @@ using FileWriterFactory =
 }  // namespace io
 }  // namespace infinityslam
 
-#endif  // CSMLIO_IO_FILE_WRITER_H_
+#endif  // INFINITYSLAM_IO_FILE_WRITER_H_

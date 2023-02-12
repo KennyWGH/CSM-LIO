@@ -9,9 +9,9 @@
 
 namespace infinityslam {
 
-namespace mapping {
+namespace csmlio {
 
 
 
-}  // namespace mapping
+}  // namespace csmlio
 }  // namespace infinityslam

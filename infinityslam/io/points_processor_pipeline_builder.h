@@ -14,8 +14,8 @@
 //  * limitations under the License.
 //  */
 
-// #ifndef CSMLIO_IO_POINTS_PROCESSOR_PIPELINE_BUILDER_H_
-// #define CSMLIO_IO_POINTS_PROCESSOR_PIPELINE_BUILDER_H_
+// #ifndef INFINITYSLAM_IO_POINTS_PROCESSOR_PIPELINE_BUILDER_H_
+// #define INFINITYSLAM_IO_POINTS_PROCESSOR_PIPELINE_BUILDER_H_
 
 // #include <string>
 // #include <vector>
@@ -61,11 +61,11 @@
 // // Register all 'PointsProcessor' that ship with Cartographer with this
 // // 'builder'.
 // void RegisterBuiltInPointsProcessors(
-//     const std::vector<mapping::proto::Trajectory>& trajectories,
+//     const std::vector<csmlio::proto::Trajectory>& trajectories,
 //     const FileWriterFactory& file_writer_factory,
 //     PointsProcessorPipelineBuilder* builder);
 
 // }  // namespace io
 // }  // namespace infinityslam
 
-// #endif  // CSMLIO_IO_POINTS_PROCESSOR_PIPELINE_BUILDER_H_
+// #endif  // INFINITYSLAM_IO_POINTS_PROCESSOR_PIPELINE_BUILDER_H_

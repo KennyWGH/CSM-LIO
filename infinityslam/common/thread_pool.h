@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef CSMLIO_COMMON_THREAD_POOL_H_
-#define CSMLIO_COMMON_THREAD_POOL_H_
+#ifndef INFINITYSLAM_COMMON_THREAD_POOL_H_
+#define INFINITYSLAM_COMMON_THREAD_POOL_H_
 
 #include <deque>
 #include <functional>
@@ -83,4 +83,4 @@ class ThreadPool : public ThreadPoolInterface {
 }  // namespace common
 }  // namespace infinityslam
 
-#endif  // CSMLIO_COMMON_THREAD_POOL_H_
+#endif  // INFINITYSLAM_COMMON_THREAD_POOL_H_

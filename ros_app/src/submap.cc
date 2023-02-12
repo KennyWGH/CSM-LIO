@@ -27,7 +27,7 @@
 namespace ros_app {
 
 std::unique_ptr<::infinityslam::io::SubmapTextures> FetchSubmapTextures(
-    const ::infinityslam::mapping::SubmapId& submap_id,
+    const ::infinityslam::csmlio::SubmapId& submap_id,
     ros::ServiceClient* client) 
 {
   // wgh: 创建请求消息，得到的信息实体就存放在 <srv.response.textures> 中。

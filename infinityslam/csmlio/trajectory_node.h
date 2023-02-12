@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef CSMLIO_MAPPING_TRAJECTORY_NODE_H_
-#define CSMLIO_MAPPING_TRAJECTORY_NODE_H_
+#ifndef INFINITYSLAM_CSMLIO_TRAJECTORY_NODE_H_
+#define INFINITYSLAM_CSMLIO_TRAJECTORY_NODE_H_
 
 #include <memory>
 #include <vector>
@@ -27,7 +27,7 @@
 #include "infinityslam/transform/rigid_transform.h"
 
 namespace infinityslam {
-namespace mapping {
+namespace csmlio {
 
 struct TrajectoryNodePose {
   struct ConstantPoseData {
@@ -73,10 +73,8 @@ struct TrajectoryNode {
   transform::Rigid3d global_pose;
 };
 
-// proto::TrajectoryNodeData ToProto(const TrajectoryNode::Data& constant_data);
-// TrajectoryNode::Data FromProto(const proto::TrajectoryNodeData& proto);
 
-}  // namespace mapping
+}  // namespace csmlio
 }  // namespace infinityslam
 
-#endif  // CSMLIO_MAPPING_TRAJECTORY_NODE_H_
+#endif  // INFINITYSLAM_CSMLIO_TRAJECTORY_NODE_H_

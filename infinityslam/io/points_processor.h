@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef CSMLIO_IO_POINTS_PROCESSOR_H_
-#define CSMLIO_IO_POINTS_PROCESSOR_H_
+#ifndef INFINITYSLAM_IO_POINTS_PROCESSOR_H_
+#define INFINITYSLAM_IO_POINTS_PROCESSOR_H_
 
 #include <memory>
 
@@ -50,4 +50,4 @@ class PointsProcessor {
 }  // namespace io
 }  // namespace infinityslam
 
-#endif  // CSMLIO_IO_POINTS_PROCESSOR_H_
+#endif  // INFINITYSLAM_IO_POINTS_PROCESSOR_H_

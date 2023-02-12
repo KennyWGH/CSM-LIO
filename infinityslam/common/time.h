@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef CSMLIO_COMMON_TIME_H_
-#define CSMLIO_COMMON_TIME_H_
+#ifndef INFINITYSLAM_COMMON_TIME_H_
+#define INFINITYSLAM_COMMON_TIME_H_
 
 #include <chrono>
 #include <ostream>
@@ -69,4 +69,4 @@ double GetThreadCpuTimeSeconds();
 }  // namespace common
 }  // namespace infinityslam
 
-#endif  // CSMLIO_COMMON_TIME_H_
+#endif  // INFINITYSLAM_COMMON_TIME_H_

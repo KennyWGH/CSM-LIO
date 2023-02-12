@@ -21,7 +21,6 @@
 #include <limits>
 
 #include "infinityslam/common/time.h"
-// #include "infinityslam/csmlio/proto/trajectory.pb.h"
 #include "infinityslam/transform/rigid_transform.h"
 #include "infinityslam/transform/timestamped_transform.h"
 
@@ -35,8 +34,6 @@ constexpr size_t kUnlimitedBufferSize = std::numeric_limits<size_t>::max();
 class TransformInterpolationBuffer {
  public:
   TransformInterpolationBuffer() = default;
-  // explicit TransformInterpolationBuffer(
-  //     const mapping::proto::Trajectory& trajectory);
 
   // Sets the transform buffer size limit and removes old transforms
   // if it is exceeded.

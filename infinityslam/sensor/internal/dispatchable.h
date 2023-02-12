@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef CSMLIO_SENSOR_INTERNAL_DISPATCHABLE_H_
-#define CSMLIO_SENSOR_INTERNAL_DISPATCHABLE_H_
+#ifndef INFINITYSLAM_SENSOR_INTERNAL_DISPATCHABLE_H_
+#define INFINITYSLAM_SENSOR_INTERNAL_DISPATCHABLE_H_
 
 // #include "infinityslam/csmlio/trajectory_builder_ interface.h"
 #include "infinityslam/sensor/data.h"
@@ -32,7 +32,7 @@ class Dispatchable : public Data {
         : Data(sensor_id), data_(data) {}
 
     common::Time GetTime() const override { return data_.time; }
-    void AddToLIO(mapping::CSMLioInterface *const lio_owner) override {
+    void AddToLIO(csmlio::CSMLioInterface *const lio_owner) override {
         lio_owner->ProcessSensorData(sensor_id_, data_);
     }
     const DataType &data() const { return data_; }
@@ -50,4 +50,4 @@ std::unique_ptr<Dispatchable<DataType>> MakeDispatchable(
 }  // namespace sensor
 }  // namespace infinityslam
 
-#endif  // CSMLIO_SENSOR_INTERNAL_DISPATCHABLE_H_
+#endif  // INFINITYSLAM_SENSOR_INTERNAL_DISPATCHABLE_H_

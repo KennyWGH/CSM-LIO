@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef CSMLIO_SENSOR_MAP_BY_TIME_H_
-#define CSMLIO_SENSOR_MAP_BY_TIME_H_
+#ifndef INFINITYSLAM_SENSOR_MAP_BY_TIME_H_
+#define INFINITYSLAM_SENSOR_MAP_BY_TIME_H_
 
 #include <algorithm>
 #include <iterator>
@@ -48,8 +48,8 @@ class MapByTime {
   // Removes data no longer needed once 'node_id' gets removed from 'nodes'.
   // 'NodeType' must contain a 'time' member of type common::Time.
   template <typename NodeType>
-  void Trim(const mapping::MapById<mapping::NodeId, NodeType>& nodes,
-            const mapping::NodeId& node_id) {
+  void Trim(const csmlio::MapById<csmlio::NodeId, NodeType>& nodes,
+            const csmlio::NodeId& node_id) {
     const int trajectory_id = node_id.trajectory_id;
     CHECK_GE(trajectory_id, 0);
     if (data_.count(trajectory_id) == 0) {
@@ -183,14 +183,14 @@ class MapByTime {
   }
 
   // Returns Range object for range-based loops over the trajectory IDs.
-  mapping::Range<ConstTrajectoryIterator> trajectory_ids() const {
-    return mapping::Range<ConstTrajectoryIterator>(
+  csmlio::Range<ConstTrajectoryIterator> trajectory_ids() const {
+    return csmlio::Range<ConstTrajectoryIterator>(
         ConstTrajectoryIterator(data_.begin()),
         ConstTrajectoryIterator(data_.end()));
   }
 
-  mapping::Range<ConstIterator> trajectory(const int trajectory_id) const {
-    return mapping::Range<ConstIterator>(BeginOfTrajectory(trajectory_id),
+  csmlio::Range<ConstIterator> trajectory(const int trajectory_id) const {
+    return csmlio::Range<ConstIterator>(BeginOfTrajectory(trajectory_id),
                                          EndOfTrajectory(trajectory_id));
   }
 
@@ -210,4 +210,4 @@ class MapByTime {
 }  // namespace sensor
 }  // namespace infinityslam
 
-#endif  // CSMLIO_SENSOR_MAP_BY_TIME_H_
+#endif  // INFINITYSLAM_SENSOR_MAP_BY_TIME_H_

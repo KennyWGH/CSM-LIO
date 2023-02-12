@@ -159,14 +159,14 @@ Node::Node(
 
     // 构造CSMLidarInertialOdometry对象。
     expected_sensor_ids_ = ComputeExpectedSensorIds(ros_wrapper_Options_);
-    csm_lio_ = boost::make_unique<infinityslam::mapping::CSMLidarInertialOdometry>(
-        infinityslam::mapping::ReadCSMLioOptions(),
+    csm_lio_ = boost::make_unique<infinityslam::csmlio::CSMLidarInertialOdometry>(
+        infinityslam::csmlio::ReadCSMLioOptions(),
         expected_sensor_ids_,
         [this](const ::infinityslam::common::Time time,
             const Rigid3d local_pose,
             ::infinityslam::sensor::RangeData range_data_in_local,
             std::shared_ptr<::infinityslam::sensor::PointCloud> point_cloud,
-            std::unique_ptr<const ::infinityslam::mapping::InsertionResult> result) {
+            std::unique_ptr<const ::infinityslam::csmlio::InsertionResult> result) {
                 OnLioResult(
                     time, 
                     local_pose, 
@@ -432,10 +432,10 @@ void Node::HandleNavSatFixMessage(
 
 ::ros::NodeHandle* Node::node_handle() { return &node_handle_; }
 
-std::set<infinityslam::mapping::SensorId>
+std::set<infinityslam::csmlio::SensorId>
 Node::ComputeExpectedSensorIds(const RosWrapperOptions& options) const 
 {
-    using SensorId = infinityslam::mapping::SensorId;
+    using SensorId = infinityslam::csmlio::SensorId;
     using SensorType = SensorId::SensorType;
     std::set<SensorId> expected_topics;
     // Subscribe to all point cloud topics.
@@ -850,7 +850,7 @@ void Node::OnLioResult(
     const Rigid3d local_pose,
     ::infinityslam::sensor::RangeData range_data_in_local,
     std::shared_ptr<::infinityslam::sensor::PointCloud> point_cloud,
-    std::unique_ptr<const ::infinityslam::mapping::InsertionResult> insertion_result) 
+    std::unique_ptr<const ::infinityslam::csmlio::InsertionResult> insertion_result) 
 {
     // 对于指针对象，我们必须深拷贝数据，避免wrapper层和core层访问同一个数据块。
     std::shared_ptr<::infinityslam::sensor::PointCloud> point_cloud_;

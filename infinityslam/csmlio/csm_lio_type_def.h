@@ -2,8 +2,8 @@
  * Copyright 2022 WANG Guanhua (wangxxx@gmail.com)
 */
 
-#ifndef CSMLIO_MAPPING_UTILITY_H_
-#define CSMLIO_MAPPING_UTILITY_H_
+#ifndef INFINITYSLAM_CSMLIO_UTILITY_H_
+#define INFINITYSLAM_CSMLIO_UTILITY_H_
 
 #include <string>
 #include <iostream>
@@ -16,13 +16,13 @@
 #include "infinityslam/sensor/imu_data.h"
 #include "infinityslam/sensor/odometry_data.h"
 #include "infinityslam/sensor/timed_point_cloud_data.h"
-#include "infinityslam/csmlio/submaps.h"
-#include "infinityslam/csmlio/3d/submap_3d.h"
+#include "infinityslam/csmlio/submap/submaps.h"
+#include "infinityslam/csmlio/submap/submap_3d.h"
 #include "infinityslam/csmlio/trajectory_node.h"
 #include "infinityslam/transform/rigid_transform.h"
 
 namespace infinityslam {
-namespace mapping {
+namespace csmlio {
 
 struct SensorId {
     enum class SensorType {
@@ -64,7 +64,7 @@ struct InsertionResult {
     // NodeId node_id; //TrajBuilderInterface版本【弃】；LocalTrajBuilder3D版本中【没有】此变量
     std::shared_ptr<const TrajectoryNode::Data> constant_data;
     // std::vector<std::shared_ptr<const Submap>> insertion_submaps; //TrajBuilderInterface版本【弃】
-    std::vector<std::shared_ptr<const mapping::Submap3D>> insertion_submaps; //LocalTrajBuilder3D版本
+    std::vector<std::shared_ptr<const csmlio::Submap3D>> insertion_submaps; //LocalTrajBuilder3D版本
 };
 
 struct MatchingResult {
@@ -88,7 +88,7 @@ using LioResultCallback =
                        std::unique_ptr<const InsertionResult>)>;
 
 
-}  // namespace mapping
+}  // namespace csmlio
 }  // namespace infinityslam
 
-#endif  // CSMLIO_MAPPING_UTILITY_H_
+#endif  // INFINITYSLAM_CSMLIO_UTILITY_H_

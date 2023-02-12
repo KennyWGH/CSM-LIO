@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef CSMLIO_SENSOR_POINT_CLOUD_H_
-#define CSMLIO_SENSOR_POINT_CLOUD_H_
+#ifndef INFINITYSLAM_SENSOR_POINT_CLOUD_H_
+#define INFINITYSLAM_SENSOR_POINT_CLOUD_H_
 
 #include <vector>
 
@@ -123,4 +123,4 @@ PointCloud CropPointCloud(const PointCloud& point_cloud, float min_z,
 }  // namespace sensor
 }  // namespace infinityslam
 
-#endif  // CSMLIO_SENSOR_POINT_CLOUD_H_
+#endif  // INFINITYSLAM_SENSOR_POINT_CLOUD_H_

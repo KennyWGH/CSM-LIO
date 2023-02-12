@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef CSMLIO_COMMON_PORT_H_
-#define CSMLIO_COMMON_PORT_H_
+#ifndef INFINITYSLAM_COMMON_PORT_H_
+#define INFINITYSLAM_COMMON_PORT_H_
 
 #include <boost/iostreams/device/back_inserter.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
@@ -68,4 +68,4 @@ inline void FastGunzipString(const std::string& compressed,
 }  // namespace common
 }  // namespace infinityslam
 
-#endif  // CSMLIO_COMMON_PORT_H_
+#endif  // INFINITYSLAM_COMMON_PORT_H_

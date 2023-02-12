@@ -26,14 +26,6 @@
 namespace infinityslam {
 namespace transform {
 
-// TransformInterpolationBuffer::TransformInterpolationBuffer(
-//     const mapping::proto::Trajectory& trajectory) {
-//   for (const mapping::proto::Trajectory::Node& node : trajectory.node()) {
-//     Push(common::FromUniversal(node.timestamp()),
-//          transform::ToRigid3(node.pose()));
-//   }
-// }
-
 void TransformInterpolationBuffer::Push(const common::Time time,
                                         const transform::Rigid3d& transform) {
   if (!timestamped_transforms_.empty()) {

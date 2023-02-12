@@ -137,7 +137,7 @@ class Node {
 
     // Returns the set of SensorIds expected for a trajectory.
     // 'SensorId::id' is the expected ROS topic name.
-    std::set<::infinityslam::mapping::SensorId>
+    std::set<::infinityslam::csmlio::SensorId>
     ComputeExpectedSensorIds(const RosWrapperOptions& options) const;
 
     void LaunchSubscribers(const RosWrapperOptions& options);
@@ -157,7 +157,7 @@ class Node {
                             const ::infinityslam::transform::Rigid3d local_pose,
                             ::infinityslam::sensor::RangeData range_data_in_local,
                             std::shared_ptr<::infinityslam::sensor::PointCloud> point_cloud,
-                            std::unique_ptr<const ::infinityslam::mapping::InsertionResult> insertion_result)
+                            std::unique_ptr<const ::infinityslam::csmlio::InsertionResult> insertion_result)
         LOCKS_EXCLUDED(result_mutex_);
 
     void PerformPostProcKfLoop();
@@ -169,9 +169,9 @@ class Node {
     std::unique_ptr<TfBridge> tf_bridge_;
 
     // 从TrajOptions中推断出来的SensorIds。
-    std::set<infinityslam::mapping::SensorId> expected_sensor_ids_;
+    std::set<infinityslam::csmlio::SensorId> expected_sensor_ids_;
 
-    std::unique_ptr<infinityslam::mapping::CSMLidarInertialOdometry> csm_lio_;
+    std::unique_ptr<infinityslam::csmlio::CSMLidarInertialOdometry> csm_lio_;
 
     // 由WallTimer或Timer触发的回调线程与主线程访问同一数据的访问保护[存疑]。
     // 有一个问题是，在ros::spin()这一典型Single-threaded Spinning模式下，
@@ -185,7 +185,7 @@ class Node {
     // SLAM返回的最新数据放在这里，访问需要加锁。
     std::shared_ptr<const SlamKeyframeData::LioKeyframeData>
         lio_result_data_;
-    std::shared_ptr<const ::infinityslam::mapping::InsertionResult>
+    std::shared_ptr<const ::infinityslam::csmlio::InsertionResult>
         insertion_result_data_;
 
     // 类内部成员，默认构造；外部main函数不拥有此对象。
