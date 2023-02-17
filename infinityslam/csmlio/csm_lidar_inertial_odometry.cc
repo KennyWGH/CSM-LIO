@@ -506,7 +506,7 @@ CSMLidarInertialOdometry::AddRangeData(
 
     // [WGH] step05 按预测位姿对每个点去畸变，并根据range区分hits/misses点 
     const size_t max_possible_number_of_accumulated_points = hit_times.size();
-    std::vector<sensor::RangefinderPoint> accumulated_points;
+    std::vector<sensor::PointTypeXYZ> accumulated_points;
     std::vector<float> accumulated_intensities;
     accumulated_points.reserve(max_possible_number_of_accumulated_points);
     if (csm_lio_Options_.use_intensities) {
@@ -526,7 +526,7 @@ CSMLidarInertialOdometry::AddRangeData(
         const float range = delta.norm();
         if (range >= csm_lio_Options_.min_range) {
             if (range <= csm_lio_Options_.max_range) {
-            accumulated_points.push_back(sensor::RangefinderPoint{hit_in_local});
+            accumulated_points.push_back(sensor::PointTypeXYZ{hit_in_local});
             if (csm_lio_Options_.use_intensities) {
                 accumulated_intensities.push_back(hit.intensity);
             }
@@ -536,7 +536,7 @@ CSMLidarInertialOdometry::AddRangeData(
             // will be updated.
             // TODO(wohe): since `misses` are not used anywhere in 3D, consider
             // removing `misses` from `range_data` and/or everywhere in 3D.
-            misses.push_back(sensor::RangefinderPoint{
+            misses.push_back(sensor::PointTypeXYZ{
                 origin_in_local + csm_lio_Options_.max_range / range * delta});
             }
         }

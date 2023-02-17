@@ -20,7 +20,7 @@
 #include <vector>
 
 #include "Eigen/Core"
-#include "infinityslam/sensor/rangefinder_point.h"
+#include "infinityslam/sensor/point_type.h"
 #include "infinityslam/transform/rigid_transform.h"
 #include "glog/logging.h"
 
@@ -31,7 +31,7 @@ namespace sensor {
 // intensities.
 class PointCloud {
  public:
-  using PointType = RangefinderPoint;
+  using PointType = PointTypeXYZ;
 
   PointCloud();
   explicit PointCloud(std::vector<PointType> points);
@@ -86,22 +86,20 @@ class PointCloud {
   }
 
  private:
-  // For 2D points, the third entry is 0.f.
   std::vector<PointType> points_;
-  // Intensities are optional. If non-empty, they must have the same size as
-  // points.
+
+  // Intensities are optional. 
+  // If non-empty, they must have the same size as points.
   std::vector<float> intensities_;
 };
 
 // Stores 3D positions of points with their relative measurement time in the
 // fourth entry. Time is in seconds, increasing and relative to the moment when
 // the last point was acquired. So, the fourth entry for the last point is 0.f.
-// If timing is not available, all fourth entries are 0.f. For 2D points, the
-// third entry is 0.f (and the fourth entry is time).
-using TimedPointCloud = std::vector<TimedRangefinderPoint>;
+// If timing is not available, all fourth entries are 0.f.
+using TimedPointCloud = std::vector<PointTypeXYZT>;
 
-// TODO(wohe): Retained for cartographer_ros. To be removed once it is no
-// longer used there.
+// 与ROS层进行数据格式转换
 struct PointCloudWithIntensities {
   TimedPointCloud points;
   std::vector<float> intensities;

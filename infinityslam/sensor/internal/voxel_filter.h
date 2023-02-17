@@ -44,8 +44,8 @@ struct AdaptiveVoxelFIlterOpTions {
     double max_range_ = 60.;
 };
 
-std::vector<RangefinderPoint> VoxelFilter(
-    const std::vector<RangefinderPoint>& points, const float resolution);
+std::vector<PointTypeXYZ> VoxelFilter(
+    const std::vector<PointTypeXYZ>& points, const float resolution);
 
 PointCloud VoxelFilter(const PointCloud& point_cloud, const float resolution);
 

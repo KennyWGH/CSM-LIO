@@ -31,7 +31,7 @@ namespace {
 
 PointCloud FilterByMaxRange(const PointCloud& point_cloud,
                             const float max_range) {
-  return point_cloud.copy_if([max_range](const RangefinderPoint& point) {
+  return point_cloud.copy_if([max_range](const PointTypeXYZ& point) {
     return point.position.norm() <= max_range;
   });
 }
@@ -132,19 +132,19 @@ std::vector<T> RandomizedVoxelFilter(const std::vector<T>& point_cloud,
 
 }  // namespace
 
-std::vector<RangefinderPoint> VoxelFilter(
-    const std::vector<RangefinderPoint>& points, const float resolution) {
+std::vector<PointTypeXYZ> VoxelFilter(
+    const std::vector<PointTypeXYZ>& points, const float resolution) {
   return RandomizedVoxelFilter(
       points, resolution,
-      [](const RangefinderPoint& point) { return point.position; });
+      [](const PointTypeXYZ& point) { return point.position; });
 }
 
 PointCloud VoxelFilter(const PointCloud& point_cloud, const float resolution) {
   const std::vector<bool> points_used = RandomizedVoxelFilterIndices(
       point_cloud.points(), resolution,
-      [](const RangefinderPoint& point) { return point.position; });
+      [](const PointTypeXYZ& point) { return point.position; });
 
-  std::vector<RangefinderPoint> filtered_points;
+  std::vector<PointTypeXYZ> filtered_points;
   for (size_t i = 0; i < point_cloud.size(); i++) {
     if (points_used[i]) {
       filtered_points.push_back(point_cloud[i]);
@@ -165,7 +165,7 @@ TimedPointCloud VoxelFilter(const TimedPointCloud& timed_point_cloud,
                             const float resolution) {
   return RandomizedVoxelFilter(
       timed_point_cloud, resolution,
-      [](const TimedRangefinderPoint& point) { return point.position; });
+      [](const PointTypeXYZT& point) { return point.position; });
 }
 
 std::vector<sensor::TimedPointCloudOriginData::RangeMeasurement> VoxelFilter(

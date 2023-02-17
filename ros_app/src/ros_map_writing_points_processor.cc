@@ -51,7 +51,7 @@ RosMapWritingPointsProcessor::RosMapWritingPointsProcessor(
 // }
 
 void RosMapWritingPointsProcessor::Process(
-    std::unique_ptr<::infinityslam::io::PointsBatch> batch) {
+    std::unique_ptr<::infinityslam::sensor::PointsBatchXYZ> batch) {
   range_data_inserter_.Insert(
       {batch->origin, ::infinityslam::sensor::PointCloud(batch->points), {}},
       &probability_grid_);

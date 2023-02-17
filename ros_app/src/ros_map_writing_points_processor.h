@@ -50,7 +50,7 @@ class RosMapWritingPointsProcessor
 
     ~RosMapWritingPointsProcessor() override {}
 
-    void Process(std::unique_ptr<::infinityslam::io::PointsBatch> batch) override;
+    void Process(std::unique_ptr<::infinityslam::sensor::PointsBatchXYZ> batch) override;
     FlushResult Flush() override;
 
  private:

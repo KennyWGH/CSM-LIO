@@ -316,48 +316,48 @@ set_target_properties(${PROJECT_ROS_APP_NODE} PROPERTIES
 ## #################    构建 Online Dynamic Remover 部分    #################
 ## #########################################################################
 
-# TODO: 如果找到了文件夹和CMakeLists文件，才执行编译。
+# # TODO: 如果找到了文件夹和CMakeLists文件，才执行编译。
 
-set(DYNC_REMOVER_SRCS 
-  online_dynamic_remover/online_dynamic_remover.cpp
-  online_dynamic_remover/points_batch.cc
-)
+# set(DYNC_REMOVER_SRCS 
+#   online_dynamic_remover/online_dynamic_remover.cpp
+#   online_dynamic_remover/points_batch.cc
+# )
 
-set(DYNC_REMOVER_HDRS 
-  online_dynamic_remover/online_dynamic_remover.h
-  online_dynamic_remover/points_batch.h
-  online_dynamic_remover/incremental_grid.h
-)
+# set(DYNC_REMOVER_HDRS 
+#   online_dynamic_remover/online_dynamic_remover.h
+#   online_dynamic_remover/points_batch.h
+#   online_dynamic_remover/incremental_cube.h
+# )
 
-set(PROJECT_DYNC_REMOVER_NODE "online_dynamic_removal_and_mapping") #可执行文件名应与ROS节点名相同 
+# set(PROJECT_DYNC_REMOVER_NODE "online_dynamic_removal_and_mapping") #可执行文件名应与ROS节点名相同 
 
-add_library(${PROJECT_DYNC_REMOVER_NODE} STATIC ${DYNC_REMOVER_HDRS} ${DYNC_REMOVER_SRCS})
+# add_library(${PROJECT_DYNC_REMOVER_NODE} STATIC ${DYNC_REMOVER_HDRS} ${DYNC_REMOVER_SRCS})
 
-target_link_libraries(${PROJECT_DYNC_REMOVER_NODE} PUBLIC ${PROJECT_CORE})
+# target_link_libraries(${PROJECT_DYNC_REMOVER_NODE} PUBLIC ${PROJECT_CORE})
 
-# yaml-cpp
-target_include_directories(${PROJECT_ROS_APP_NODE} SYSTEM PUBLIC ${YAML_CPP_INCLUDE_DIR})
+# # yaml-cpp
+# target_include_directories(${PROJECT_ROS_APP_NODE} SYSTEM PUBLIC ${YAML_CPP_INCLUDE_DIR})
 
-# PCL
-target_include_directories(${PROJECT_DYNC_REMOVER_NODE} SYSTEM PUBLIC ${PCL_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_DYNC_REMOVER_NODE} PUBLIC ${PCL_LIBRARIES})
+# # PCL
+# target_include_directories(${PROJECT_DYNC_REMOVER_NODE} SYSTEM PUBLIC ${PCL_INCLUDE_DIRS})
+# target_link_libraries(${PROJECT_DYNC_REMOVER_NODE} PUBLIC ${PCL_LIBRARIES})
 
-# Eigen
-target_include_directories(${PROJECT_DYNC_REMOVER_NODE} SYSTEM PUBLIC
-  "${EIGEN3_INCLUDE_DIR}")
+# # Eigen
+# target_include_directories(${PROJECT_DYNC_REMOVER_NODE} SYSTEM PUBLIC
+#   "${EIGEN3_INCLUDE_DIR}")
 
-# Boost
-target_include_directories(${PROJECT_DYNC_REMOVER_NODE} SYSTEM PUBLIC
-  "${Boost_INCLUDE_DIRS}")
-target_link_libraries(${PROJECT_DYNC_REMOVER_NODE} PUBLIC ${Boost_LIBRARIES})
+# # Boost
+# target_include_directories(${PROJECT_DYNC_REMOVER_NODE} SYSTEM PUBLIC
+#   "${Boost_INCLUDE_DIRS}")
+# target_link_libraries(${PROJECT_DYNC_REMOVER_NODE} PUBLIC ${Boost_LIBRARIES})
 
-# Catkin
-target_include_directories(${PROJECT_DYNC_REMOVER_NODE} SYSTEM PUBLIC ${catkin_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_DYNC_REMOVER_NODE} PUBLIC ${catkin_LIBRARIES})
+# # Catkin
+# target_include_directories(${PROJECT_DYNC_REMOVER_NODE} SYSTEM PUBLIC ${catkin_INCLUDE_DIRS})
+# target_link_libraries(${PROJECT_DYNC_REMOVER_NODE} PUBLIC ${catkin_LIBRARIES})
 
-set(DYNC_REMOVER_COMPILE_FLAGS "${CORE_COMPILE_FLAGS}")
-message(STATUS "######### DYNC_REMOVER_COMPILE_FLAGS: ${DYNC_REMOVER_COMPILE_FLAGS}")
-set_target_properties(${PROJECT_DYNC_REMOVER_NODE} PROPERTIES
-  COMPILE_FLAGS ${DYNC_REMOVER_COMPILE_FLAGS})
+# set(DYNC_REMOVER_COMPILE_FLAGS "${CORE_COMPILE_FLAGS}")
+# message(STATUS "######### DYNC_REMOVER_COMPILE_FLAGS: ${DYNC_REMOVER_COMPILE_FLAGS}")
+# set_target_properties(${PROJECT_DYNC_REMOVER_NODE} PROPERTIES
+#   COMPILE_FLAGS ${DYNC_REMOVER_COMPILE_FLAGS})
 
 

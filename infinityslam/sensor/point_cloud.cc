@@ -64,9 +64,9 @@ void PointCloud::clear() {
 
 PointCloud TransformPointCloud(const PointCloud& point_cloud,
                                const transform::Rigid3f& transform) {
-  std::vector<RangefinderPoint> points;
+  std::vector<PointTypeXYZ> points;
   points.reserve(point_cloud.size());
-  for (const RangefinderPoint& point : point_cloud.points()) {
+  for (const PointTypeXYZ& point : point_cloud.points()) {
     points.emplace_back(transform * point);
   }
   return PointCloud(points, point_cloud.intensities());
@@ -76,7 +76,7 @@ TimedPointCloud TransformTimedPointCloud(const TimedPointCloud& point_cloud,
                                          const transform::Rigid3f& transform) {
   TimedPointCloud result;
   result.reserve(point_cloud.size());
-  for (const TimedRangefinderPoint& point : point_cloud) {
+  for (const PointTypeXYZT& point : point_cloud) {
     result.push_back(transform * point);
   }
   return result;
@@ -84,7 +84,7 @@ TimedPointCloud TransformTimedPointCloud(const TimedPointCloud& point_cloud,
 
 PointCloud CropPointCloud(const PointCloud& point_cloud, const float min_z,
                           const float max_z) {
-  return point_cloud.copy_if([min_z, max_z](const RangefinderPoint& point) {
+  return point_cloud.copy_if([min_z, max_z](const PointTypeXYZ& point) {
     return min_z <= point.position.z() && point.position.z() <= max_z;
   });
 }

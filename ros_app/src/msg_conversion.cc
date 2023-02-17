@@ -27,7 +27,6 @@
 #include "infinityslam/common/math.h"
 #include "infinityslam/common/port.h"
 #include "infinityslam/common/time.h"
-// #include "infinityslam/io/submap_painter.h"
 #include "infinityslam/transform/transform.h"
 #include "ros_app/src/time_conversion.h"
 #include "ros_app/src/msg_conversion.h"
@@ -147,9 +146,9 @@ bool PointCloud2HasField(const sensor_msgs::PointCloud2& pc2,
     return false;
 }
 
-using TimedRangefinderPoint = ::infinityslam::sensor::TimedRangefinderPoint;
-bool CompByStamp(const TimedRangefinderPoint& point1, 
-    const TimedRangefinderPoint& point2)
+using PointTypeXYZT = ::infinityslam::sensor::PointTypeXYZT;
+bool CompByStamp(const PointTypeXYZT& point1, 
+    const PointTypeXYZT& point2)
 {
     return point1.time < point2.time;
 }
@@ -165,7 +164,7 @@ sensor_msgs::PointCloud2 ToPointCloud2Message(
 {
     auto msg = PreparePointCloud2Message(timestamp, frame_id, point_cloud.size());
     ::ros::serialization::OStream stream(msg.data.data(), msg.data.size());
-    for (const infinityslam::sensor::TimedRangefinderPoint& point : point_cloud) {
+    for (const infinityslam::sensor::PointTypeXYZT& point : point_cloud) {
         stream.next(point.position.x());
         stream.next(point.position.y());
         stream.next(point.position.z());

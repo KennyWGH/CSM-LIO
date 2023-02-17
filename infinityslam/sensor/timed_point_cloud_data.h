@@ -35,7 +35,7 @@ struct TimedPointCloudData {
 
 struct TimedPointCloudOriginData {
   struct RangeMeasurement {
-    TimedRangefinderPoint point_time;
+    PointTypeXYZT point_time;
     float intensity;
     size_t origin_index;
   };

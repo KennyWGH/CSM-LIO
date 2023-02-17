@@ -26,51 +26,63 @@
 namespace infinityslam {
 namespace sensor {
 
-// Stores 3D position of a point observed by a rangefinder sensor.
-struct RangefinderPoint {
+// 基础点类型
+struct PointTypeXYZ {
   Eigen::Vector3f position;
 };
 
-// Stores 3D position of a point with its relative measurement time.
-// See point_cloud.h for more details.
-struct TimedRangefinderPoint {
+// 基础点类型，含相对时间
+struct PointTypeXYZT {
   Eigen::Vector3f position;
   float time;
 };
 
+// 全量点类型，含intensity、相对时间、和label
+struct PointTypeXYZITL {
+  Eigen::Vector3f position;
+  float intensity;
+  float time;
+  int label; //【规定：-1动态、0未知、1静态】
+};
+
+// 点的动静态属性标签
+constexpr int LABEL_DYNAMIC = -1;
+constexpr int LABEL_UNKNOWN = 0;
+constexpr int LABEL_STATIC = 1;
+
 template <class T>
-inline RangefinderPoint operator*(const transform::Rigid3<T>& lhs,
-                                  const RangefinderPoint& rhs) {
-  RangefinderPoint result = rhs;
+inline PointTypeXYZ operator*(const transform::Rigid3<T>& lhs,
+                                  const PointTypeXYZ& rhs) {
+  PointTypeXYZ result = rhs;
   result.position = lhs * rhs.position;
   return result;
 }
 
 template <class T>
-inline TimedRangefinderPoint operator*(const transform::Rigid3<T>& lhs,
-                                       const TimedRangefinderPoint& rhs) {
-  TimedRangefinderPoint result = rhs;
+inline PointTypeXYZT operator*(const transform::Rigid3<T>& lhs,
+                                       const PointTypeXYZT& rhs) {
+  PointTypeXYZT result = rhs;
   result.position = lhs * rhs.position;
   return result;
 }
 
-inline bool operator==(const RangefinderPoint& lhs,
-                       const RangefinderPoint& rhs) {
+inline bool operator==(const PointTypeXYZ& lhs,
+                       const PointTypeXYZ& rhs) {
   return lhs.position == rhs.position;
 }
 
-inline bool operator==(const TimedRangefinderPoint& lhs,
-                       const TimedRangefinderPoint& rhs) {
+inline bool operator==(const PointTypeXYZT& lhs,
+                       const PointTypeXYZT& rhs) {
   return lhs.position == rhs.position && lhs.time == rhs.time;
 }
 
-inline RangefinderPoint ToRangefinderPoint(
-    const TimedRangefinderPoint& timed_rangefinder_point) {
+inline PointTypeXYZ ToPointTypeXYZ(
+    const PointTypeXYZT& timed_rangefinder_point) {
   return {timed_rangefinder_point.position};
 }
 
-inline TimedRangefinderPoint ToTimedRangefinderPoint(
-    const RangefinderPoint& rangefinder_point, const float time) {
+inline PointTypeXYZT ToPointTypeXYZT(
+    const PointTypeXYZ& rangefinder_point, const float time) {
   return {rangefinder_point.position, time};
 }
 

@@ -19,7 +19,7 @@
 
 #include <memory>
 
-#include "infinityslam/io/points_batch.h"
+#include "infinityslam/sensor/points_batch.h"
 
 namespace infinityslam {
 namespace io {
@@ -40,7 +40,7 @@ class PointsProcessor {
   PointsProcessor& operator=(const PointsProcessor&) = delete;
 
   // Receive a 'points_batch', process it and pass it on.
-  virtual void Process(std::unique_ptr<PointsBatch> points_batch) = 0;
+  virtual void Process(std::unique_ptr<sensor::PointsBatchXYZ> points_batch) = 0;
 
   // Some implementations will perform expensive computations and others that do
   // multiple passes over the data might ask for restarting the stream.

@@ -21,7 +21,7 @@
 #include <string>
 
 #include <boost/make_unique.hpp>
-#include "infinityslam/io/points_batch.h"
+#include "infinityslam/sensor/points_batch.h"
 #include "glog/logging.h"
 
 namespace infinityslam {
@@ -107,7 +107,7 @@ PointsProcessor::FlushResult PcdWritingPointsProcessor::Flush() {
   LOG(FATAL);
 }
 
-void PcdWritingPointsProcessor::Process(std::unique_ptr<PointsBatch> batch) {
+void PcdWritingPointsProcessor::Process(std::unique_ptr<sensor::PointsBatchXYZ> batch) {
   if (batch->points.empty()) {
     next_->Process(std::move(batch));
     return;

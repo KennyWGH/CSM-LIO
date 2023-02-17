@@ -46,7 +46,7 @@ sensor::RangeData FilterRangeDataByMaxRange(const sensor::RangeData& range_data,
                                             const float max_range) {
   sensor::RangeData result{range_data.origin, {}, {}};
   result.returns =
-      range_data.returns.copy_if([&](const sensor::RangefinderPoint& point) {
+      range_data.returns.copy_if([&](const sensor::PointTypeXYZ& point) {
         return (point.position - range_data.origin).norm() <= max_range;
       });
   return result;
@@ -125,7 +125,7 @@ bool ExtractVoxelData(
     const std::shared_ptr<sensor::PointCloud>& point_cloud_) {
   if (point_cloud_ == nullptr) return false;
   point_cloud_->clear();
-  std::vector<sensor::RangefinderPoint> points;
+  std::vector<sensor::PointTypeXYZ> points;
   std::vector<float> intensities;
   constexpr float kXrayObstructedCellProbabilityLimit = 0.501f;
   // constexpr float kXrayObstructedCellProbabilityLimit = 0.701f;
@@ -141,8 +141,8 @@ bool ExtractVoxelData(
         hybrid_grid.GetCenterOfCell(it.GetCellIndex());
     const Eigen::Vector3f cell_center_global = transform * cell_center_submap;
 
-    point_cloud_->push_back(sensor::RangefinderPoint{cell_center_global}, probability);
-    // point_cloud_->push_back(sensor::RangefinderPoint{cell_center_global}, probability_value);
+    point_cloud_->push_back(sensor::PointTypeXYZ{cell_center_global}, probability);
+    // point_cloud_->push_back(sensor::PointTypeXYZ{cell_center_global}, probability_value);
   }
   return true;
 }

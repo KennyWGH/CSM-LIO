@@ -39,7 +39,7 @@ class PcdWritingPointsProcessor : public PointsProcessor {
   PcdWritingPointsProcessor& operator=(const PcdWritingPointsProcessor&) =
       delete;
 
-  void Process(std::unique_ptr<PointsBatch> batch) override;
+  void Process(std::unique_ptr<sensor::PointsBatchXYZ> batch) override;
   FlushResult Flush() override;
 
  private:

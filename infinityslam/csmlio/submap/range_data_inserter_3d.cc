@@ -32,7 +32,7 @@ void InsertMissesIntoGrid(const std::vector<uint16>& miss_table,
                           HybridGrid* hybrid_grid,
                           const int num_free_space_voxels) {
   const Eigen::Array3i origin_cell = hybrid_grid->GetCellIndex(origin);
-  for (const sensor::RangefinderPoint& hit : returns) {
+  for (const sensor::PointTypeXYZ& hit : returns) {
     const Eigen::Array3i hit_cell = hybrid_grid->GetCellIndex(hit.position);
 
     const Eigen::Array3i delta = hit_cell - origin_cell;
@@ -126,7 +126,7 @@ void RangeDataInserter3D::Insert(
     IntensityHybridGrid* intensity_hybrid_grid) const {
     CHECK_NOTNULL(hybrid_grid);
 
-    for (const sensor::RangefinderPoint& hit : range_data.returns) {
+    for (const sensor::PointTypeXYZ& hit : range_data.returns) {
         const Eigen::Array3i hit_cell = hybrid_grid->GetCellIndex(hit.position);
         hybrid_grid->ApplyLookupTable(hit_cell, hit_table_);
     }

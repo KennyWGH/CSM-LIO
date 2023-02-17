@@ -52,7 +52,7 @@ void AddValueToHistogram(float angle, const float value,
 Eigen::Vector3f ComputeCentroid(const sensor::PointCloud& slice) {
   CHECK(!slice.empty());
   Eigen::Vector3f sum = Eigen::Vector3f::Zero();
-  for (const sensor::RangefinderPoint& point : slice) {
+  for (const sensor::PointTypeXYZ& point : slice) {
     sum += point.position;
   }
   return sum / static_cast<float>(slice.size());
@@ -69,7 +69,7 @@ void AddPointCloudSliceToHistogram(const sensor::PointCloud& slice,
   // This is to reject, e.g., the angles observed on the ceiling and floor.
   const Eigen::Vector3f centroid = ComputeCentroid(slice);
   Eigen::Vector3f last_point_position = slice.points().front().position;
-  for (const sensor::RangefinderPoint& point : slice) {
+  for (const sensor::PointTypeXYZ& point : slice) {
     const Eigen::Vector2f delta =
         (point.position - last_point_position).head<2>();
     const Eigen::Vector2f direction = (point.position - centroid).head<2>();
@@ -98,12 +98,12 @@ sensor::PointCloud SortSlice(const sensor::PointCloud& slice) {
     }
 
     float angle;
-    sensor::RangefinderPoint point;
+    sensor::PointTypeXYZ point;
   };
   const Eigen::Vector3f centroid = ComputeCentroid(slice);
   std::vector<SortableAnglePointPair> by_angle;
   by_angle.reserve(slice.size());
-  for (const sensor::RangefinderPoint& point : slice) {
+  for (const sensor::PointTypeXYZ& point : slice) {
     const Eigen::Vector2f delta = (point.position - centroid).head<2>();
     if (delta.norm() < kMinDistance) {
       continue;
@@ -165,7 +165,7 @@ Eigen::VectorXf RotationalScanMatcher::ComputeHistogram(
     const sensor::PointCloud& point_cloud, const int histogram_size) {
   Eigen::VectorXf histogram = Eigen::VectorXf::Zero(histogram_size);
   std::map<int, sensor::PointCloud> slices;
-  for (const sensor::RangefinderPoint& point : point_cloud) {
+  for (const sensor::PointTypeXYZ& point : point_cloud) {
     slices[common::RoundToInt(point.position.z() / kSliceHeight)].push_back(
         point);
   }

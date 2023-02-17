@@ -8,7 +8,6 @@
 #define ROS_APP_MSG_CONVERSION_H
 
 #include "infinityslam/common/time.h"
-// #include "infinityslam/io/submap_painter.h"
 #include "infinityslam/sensor/point_cloud.h"
 #include "infinityslam/transform/rigid_transform.h"
 

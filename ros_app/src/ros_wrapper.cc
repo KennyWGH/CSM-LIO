@@ -707,10 +707,10 @@ void Node::PublishGlobalMapPC(const ::ros::WallTimerEvent& timer_event) {
     last_published_global_map_kf_id_ = current_latest_kf_id;
 
     // 拼接&体素将采样&生成点云地图。
-    using ::infinityslam::sensor::RangefinderPoint;
-    std::vector<RangefinderPoint> global_map_points;
+    using ::infinityslam::sensor::PointTypeXYZ;
+    std::vector<PointTypeXYZ> global_map_points;
     std::vector<float> global_map_intensities;
-    std::vector<RangefinderPoint> temp_submap_points;
+    std::vector<PointTypeXYZ> temp_submap_points;
     std::vector<float> temp_submap_intensities;
     std::size_t temp_submap_kf_num = 0;
     // 采用两个策略【1.子图+体素将采样；2.跳帧】以控制点云地图的大小，使得在轨迹规模
