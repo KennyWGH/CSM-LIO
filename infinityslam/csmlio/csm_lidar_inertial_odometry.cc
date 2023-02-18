@@ -67,13 +67,21 @@ CSMLioOptions ReadCSMLioOptions() {
     return options;
 }
 
+utils::MotionFIlterOptions ReadCSMLioMotionFIlterOptions() {
+    utils::MotionFIlterOptions options;
+    options.max_time_seconds = common::options::csmlio::motion_filter_max_time_seconds;
+    options.max_distance_meters = common::options::csmlio::motion_filter_max_distance_meters;
+    options.max_angle_radians = common::options::csmlio::motion_filter_max_angle_radians;
+    return options;
+}
+
 CSMLidarInertialOdometry::CSMLidarInertialOdometry(
     const CSMLioOptions& csm_lio_options,
     const std::set<SensorId>& expected_sensor_ids,
     csmlio::LioResultCallback lio_result_callback)
     : csm_lio_Options_(csm_lio_options)
     , active_submaps_(csmlio::ReadActiveSubmaps3DOptions())
-    , motion_filter_(csmlio::ReadMotionFIlterOpTions())
+    , motion_filter_(ReadCSMLioMotionFIlterOptions())
     , ceres_scan_matcher_(csmlio::scan_matching::CreateCeresScanMatcher3D())
     , range_data_collator_(SelectRangeSensorIds(expected_sensor_ids))
     , lio_result_callback_(lio_result_callback)
@@ -195,9 +203,9 @@ void CSMLidarInertialOdometry::ProcessSensorData(
                 matching_result->insertion_result->constant_data,
                 matching_result->insertion_result->constant_data->local_pose});
         // 单独保存关键帧位姿队列
-        timed_pose_queue_.push_back(utils::TimedPose{
-            common::ToSeconds(matching_result->insertion_result->constant_data->time), 
+        timed_pose_queue_.push_back(transform::TimedPose{
             matching_result->insertion_result->constant_data->time, 
+            common::ToSeconds(matching_result->insertion_result->constant_data->time), 
             matching_result->insertion_result->constant_data->local_pose});
         while (timed_pose_queue_.size() > 2 &&
             timed_pose_queue_[1].time <= timed_pose_queue_.back().time - kPoseQueueDuration) 
@@ -291,7 +299,7 @@ CSMLidarInertialOdometry::GetSlamKeyframeList() const
     return slam_keyframes_data_;
 }
 
-const std::deque<utils::TimedPose>& 
+const std::deque<transform::TimedPose>& 
 CSMLidarInertialOdometry::GetTimedPoseQueue() const
 {
     std::lock_guard<std::mutex> lock(mutex_);

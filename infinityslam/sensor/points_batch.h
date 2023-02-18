@@ -123,7 +123,7 @@ struct PointsBatchT {
 
     // 假定所有点的坐标都表达在同一时刻。
     common::Time start_time;
-    double start_time_ = 0;
+    double timestamp = 0;
 
     // sensor在“外部坐标系”中的位置，也即所有points的“原点”。
     Eigen::Vector3f origin;

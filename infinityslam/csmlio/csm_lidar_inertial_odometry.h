@@ -16,7 +16,7 @@
 #include <chrono>
 #include <memory>
 
-#include "infinityslam/common/port.h"
+#include "infinityslam/common/numeric_types.h"
 #include "infinityslam/common/time.h"
 #include "infinityslam/common/optional.h"
 #include "infinityslam/common/thread_pool.h"
@@ -34,13 +34,13 @@
 #include "infinityslam/sensor/internal/collator.h"
 #include "infinityslam/sensor/internal/trajectory_collator.h"
 #include "infinityslam/transform/rigid_transform.h"
-#include "infinityslam/utils/utility.h"
+#include "infinityslam/transform/timed_pose.h"
 #include "infinityslam/csmlio/submap/submaps.h"
 #include "infinityslam/csmlio/submap/submap_3d.h"
 #include "infinityslam/csmlio/scan_matching/ceres_scan_matcher_3d.h"
 #include "infinityslam/csmlio/scan_matching/real_time_correlative_scan_matcher_3d.h"
 #include "infinityslam/csmlio/pose_extrapolator/pose_extrapolator_interface.h"
-#include "infinityslam/csmlio/tools/motion_filter.h"
+#include "infinityslam/utils/motion_filter.h"
 #include "infinityslam/csmlio/range_data_collator.h"
 #include "infinityslam/csmlio/trajectory_node.h"
 #include "infinityslam/csmlio/csm_lio_type_def.h"
@@ -93,8 +93,11 @@ struct CSMLioOptions {
     // std::string DebugString() {}
 };
 
-// 从common::options中加载参数
+// 从common::options::csmlio中加载参数
 CSMLioOptions ReadCSMLioOptions();
+
+// 从common::options::csmlio中加载参数
+utils::MotionFIlterOptions ReadCSMLioMotionFIlterOptions();
 
 class CSMLidarInertialOdometry : public CSMLioInterface {
   public:
@@ -146,7 +149,7 @@ class CSMLidarInertialOdometry : public CSMLioInterface {
 
     // 向外输出slam信息。
     const std::deque<TrajectoryNode>& GetSlamKeyframeList() const;
-    const std::deque<utils::TimedPose>& GetTimedPoseQueue() const;
+    const std::deque<transform::TimedPose>& GetTimedPoseQueue() const;
 
     std::vector<std::shared_ptr<const sensor::PointCloud>> GetActiveSubmapCloudsList();
     const sensor::PointCloud& GetActiveSubmapCloudsInOne();
@@ -198,7 +201,7 @@ class CSMLidarInertialOdometry : public CSMLioInterface {
     std::shared_ptr<sensor::PointCloud> submap_cloud_all_;     //所有的
     mutable bool active_submaps_updated = false;
 
-    csmlio::MotionFilter motion_filter_;
+    utils::MotionFilter motion_filter_;
     std::unique_ptr<csmlio::scan_matching::RealTimeCorrelativeScanMatcher3D>
         real_time_correlative_scan_matcher_;
     std::unique_ptr<csmlio::scan_matching::CeresScanMatcher3D> ceres_scan_matcher_;
@@ -206,7 +209,7 @@ class CSMLidarInertialOdometry : public CSMLioInterface {
     std::unique_ptr<csmlio::PoseExtrapolatorInterface> extrapolator_;
 
     int num_accumulated_ = 0;
-    std::vector<sensor::TimedPointCloudOriginData>
+    std::vector<sensor::MultiTimedPOintCloudData>
         accumulated_point_cloud_origin_data_;
     common::optional<std::chrono::steady_clock::time_point> last_wall_time_;
 
@@ -262,7 +265,7 @@ class CSMLidarInertialOdometry : public CSMLioInterface {
 
     // 在顶层类中保留一份位姿队列，可供wrapper层获取。
     const common::Duration kPoseQueueDuration; //5秒
-    std::deque<utils::TimedPose> timed_pose_queue_;
+    std::deque<transform::TimedPose> timed_pose_queue_;
 
 };
 

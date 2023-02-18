@@ -19,9 +19,9 @@
 #include <algorithm>
 #include "boost/make_unique.hpp"
 
-#include "infinityslam/csmlio/tools/imu_integration.h"
+#include "infinityslam/utils/imu_integration.h"
+#include "infinityslam/utils/eigen_quaternion_from_two_vectors.h"
 #include "infinityslam/csmlio/optimization/rotation_parameterization.h"
-#include "infinityslam/csmlio/tools/eigen_quaterniond_from_two_vectors.h"
 #include "infinityslam/csmlio/optimization/ceres_pose.h"
 #include "infinityslam/csmlio/optimization/cost_functions/acceleration_cost_function_3d.h"
 #include "infinityslam/csmlio/optimization/cost_functions/rotation_cost_function_3d.h"
@@ -80,7 +80,7 @@ ImuBasedPoseExtrapolator::InitializeWithImu(
     } else {
         extrapolator->AddPose(
             imu_data.back().time,
-            transform::Rigid3d::Rotation(FromTwoVectors(
+            transform::Rigid3d::Rotation(utils::FromTwoVectors(
                 imu_data.back().linear_acceleration, Eigen::Vector3d::UnitZ())));
     }
     return extrapolator;

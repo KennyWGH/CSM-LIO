@@ -1,15 +1,15 @@
 cmake_minimum_required(VERSION 3.2)
-project(csm_lio)
+project(infinityslam_ros)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++11)
 
 ## 添加版本号
-set(CSMLIO_MAJOR_VERSION 1)
-set(CSMLIO_MINOR_VERSION 0)
-set(CSMLIO_PATCH_VERSION 0)
-set(CSMLIO_VERSION ${CSMLIO_MAJOR_VERSION}.${CSMLIO_MINOR_VERSION}.${CSMLIO_PATCH_VERSION}) # 库版本号
-set(CSMLIO_SOVERSION ${CSMLIO_MAJOR_VERSION}.${CSMLIO_MINOR_VERSION}.${CSMLIO_PATCH_VERSION}) # API版本号
+set(INFINITYSLAM_X_MAJOR_VERSION 1)
+set(INFINITYSLAM_X_MINOR_VERSION 0)
+set(INFINITYSLAM_X_PATCH_VERSION 0)
+set(INFINITYSLAM_X_VERSION ${INFINITYSLAM_X_MAJOR_VERSION}.${INFINITYSLAM_X_MINOR_VERSION}.${INFINITYSLAM_X_PATCH_VERSION}) # 库版本号
+set(INFINITYSLAM_X_SOVERSION ${INFINITYSLAM_X_MAJOR_VERSION}.${INFINITYSLAM_X_MINOR_VERSION}.${INFINITYSLAM_X_PATCH_VERSION}) # API版本号
 
 ## Initialize project, see .cmake script for details.
 ## 初始化一些配置信息，包括{CMAKE_MODULE_PATH、BUILD_TYPE,、编译器选项}，查阅脚本获取详细信息。
@@ -27,7 +27,7 @@ message(STATUS "######### CXX_COMPILE_FLAGS: " ${CXX_COMPILE_FLAGS})
 
 
 ## #########################################################################
-## #################         构建 CSM_LIO CORE 部分         #################
+## #################            找齐所有第三方依赖            #################
 ## #########################################################################
 
 find_package(absl REQUIRED)
@@ -36,7 +36,7 @@ find_package(Boost REQUIRED COMPONENTS system filesystem thread iostreams)
 find_package(Ceres REQUIRED COMPONENTS SuiteSparse)
 message(STATUS "######### absl_FOUND        : " ${absl_FOUND})
 message(STATUS "######### absl_INCLUDE_DIR  : " ${absl_INCLUDE_DIR})
-message(STATUS "######### absl_LIBRARIES    : " ${abslLIBRARIES})
+message(STATUS "######### absl_LIBRARIES    : " ${absl_LIBRARIES})
 message(STATUS "######### EIGEN3_INCLUDE_DIR: " ${EIGEN3_INCLUDE_DIR})
 message(STATUS "######### EIGEN3_LIBRARIES  : " ${EIGEN3_LIBRARIES})
 message(STATUS "######### Boost_INCLUDE_DIRS: " ${Boost_INCLUDE_DIRS})
@@ -45,6 +45,22 @@ message(STATUS "######### Boost_LIBRARIES   : " ${Boost_LIBRARIES})
 if(NOT absl_FOUND)
   message(FATAL_ERROR "absl not found.")
 endif()
+
+set(absl_LIBRARIES
+  absl::algorithm
+  absl::base
+  absl::debugging
+  absl::flat_hash_map
+  absl::memory
+  absl::meta
+  absl::numeric
+  absl::str_format
+  absl::strings
+  absl::synchronization
+  absl::time
+  absl::utility 
+)
+message(STATUS "######### absl_LIBRARIES    : " ${absl_LIBRARIES})
 
 find_package(Protobuf 3.0.0 REQUIRED)
 
@@ -55,6 +71,32 @@ find_package(yaml-cpp REQUIRED)
 message(STATUS "######### Is yaml-cpp found   : " yaml-cpp_FOUND)
 message(STATUS "######### YAML_CPP_INCLUDE_DIR: " ${YAML_CPP_INCLUDE_DIR})
 message(STATUS "######### YAML_CPP_LIBRARIES  : " ${YAML_CPP_LIBRARIES})
+
+include_directories(
+  ${Boost_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIR}
+  ${CERES_INCLUDE_DIRS}
+  ${YAML_CPP_INCLUDE_DIR}
+  ${CAIRO_INCLUDE_DIRS}
+  ${PROTOBUF_INCLUDE_DIR}
+)
+
+set(third_party_libraries
+  ${Boost_LIBRARIES}
+  ${EIGEN3_LIBRARIES}
+  ${CERES_LIBRARIES}
+  ${YAML_CPP_LIBRARIES}
+  glog
+  gflags
+  ${CAIRO_LIBRARIES}
+  ${PROTOBUF_LIBRARY}
+  ${absl_LIBRARIES}
+)
+
+
+## ##########################################################################
+## #################         构建 InfinitySLAM 核心库         #################
+## ##########################################################################
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
@@ -80,8 +122,8 @@ file(GLOB_RECURSE ALL_HDRS "*.h")
 file(GLOB_RECURSE ALL_SRCS "*.cc")
 file(GLOB_RECURSE ALL_CORE_HDRS "infinityslam/*.h")
 file(GLOB_RECURSE ALL_CORE_SRCS "infinityslam/*.cc")
-file(GLOB_RECURSE ALL_WRAPPER_HDRS "ros_app/*.h")
-file(GLOB_RECURSE ALL_WRAPPER_SRCS "ros_app/*.cc")
+file(GLOB_RECURSE ALL_WRAPPER_HDRS "infinityslam_ros/*.h")
+file(GLOB_RECURSE ALL_WRAPPER_SRCS "infinityslam_ros/*.cc")
 file(GLOB_RECURSE ALL_EXECUTABLES "*_main.cc")
 file(GLOB_RECURSE ALL_TESTS "*_test.cc")
 # message(STATUS "######### ALL_EXECUTABLES: " ${ALL_EXECUTABLES})
@@ -94,65 +136,21 @@ list(REMOVE_ITEM ALL_CORE_SRCS ${ALL_EXECUTABLES} ${ALL_TESTS})
 ## 捕获和逐个编译.proto文件。 ——我不需要。
 
 ## 构建项目
-set(PROJECT_CORE "${PROJECT_NAME}_core")
-add_library(${PROJECT_CORE} STATIC ${ALL_CORE_HDRS} ${ALL_CORE_SRCS})
+set(PROJECT_LIBRARY "infinityslam")
+add_library(${PROJECT_LIBRARY} STATIC ${ALL_CORE_HDRS} ${ALL_CORE_SRCS})
 
-target_include_directories(${PROJECT_CORE} SYSTEM PUBLIC
-  "${EIGEN3_INCLUDE_DIR}")
-target_link_libraries(${PROJECT_CORE} PUBLIC ${EIGEN3_LIBRARIES})
-
-target_include_directories(${PROJECT_CORE} SYSTEM PUBLIC
-  "${CERES_INCLUDE_DIRS}")
-target_link_libraries(${PROJECT_CORE} PUBLIC ${CERES_LIBRARIES})
-
-target_include_directories(${PROJECT_CORE} SYSTEM PUBLIC
-  "${YAML_CPP_INCLUDE_DIR}")
-target_link_libraries(${PROJECT_CORE} PUBLIC ${YAML_CPP_LIBRARIES})
-
-target_include_directories(${PROJECT_CORE} SYSTEM PUBLIC
-  "${Boost_INCLUDE_DIRS}")
-target_link_libraries(${PROJECT_CORE} PUBLIC ${Boost_LIBRARIES})
-
-set(GLOG_LIBRARY glog)
-target_link_libraries(${PROJECT_CORE} PUBLIC ${GLOG_LIBRARY})
-target_link_libraries(${PROJECT_CORE} PUBLIC gflags)
-
-if("${CAIRO_INCLUDE_DIRS}")
-  target_include_directories(${PROJECT_CORE} SYSTEM PUBLIC
-    "${CAIRO_INCLUDE_DIRS}")
-endif()
-target_link_libraries(${PROJECT_CORE} PUBLIC ${CAIRO_LIBRARIES})
-
-target_include_directories(${PROJECT_CORE} SYSTEM PUBLIC
-  ${PROTOBUF_INCLUDE_DIR})
-# TODO(hrapp): This should not explicitly list pthread and use
-# PROTOBUF_LIBRARIES, but that failed on first try.
-target_link_libraries(${PROJECT_CORE} PUBLIC ${PROTOBUF_LIBRARY} 
-  absl::algorithm
-  absl::base
-  absl::debugging
-  absl::flat_hash_map
-  absl::memory
-  absl::meta
-  absl::numeric
-  absl::str_format
-  absl::strings
-  absl::synchronization
-  absl::time
-  absl::utility 
-)
+target_link_libraries(${PROJECT_LIBRARY} PUBLIC ${third_party_libraries})
 
 set(CORE_COMPILE_FLAGS "${CORE_COMPILE_FLAGS} ${CXX_COMPILE_FLAGS}")
 message(STATUS "######### CORE_COMPILE_FLAGS: ${CORE_COMPILE_FLAGS}")
-set_target_properties(${PROJECT_CORE} PROPERTIES
+set_target_properties(${PROJECT_LIBRARY} PROPERTIES
   COMPILE_FLAGS ${CORE_COMPILE_FLAGS})
-
 ## done.
 
 
-## #########################################################################
-## #################        构建 ROS_APPLICATION 部分       #################
-## #########################################################################
+## ########################################################################
+## #################        构建 ROS 层可执行文件部分        #################
+## ########################################################################
 
 ## Find catkin macros and libraries and other dependices through CMmake's conventions
 ## catkin是ROS下的构建工具，同时貌似也是众多ros基础package的总称，我们要用到这些。 
@@ -223,7 +221,7 @@ endif()
 # ## wgh-- 第4行指定了所发布包依赖的其它（如操作系统中的）依赖项。
 # catkin_package(
 # #  INCLUDE_DIRS include
-# #  LIBRARIES csm_lio
+# #  LIBRARIES infinity_xxx_slam
 #  CATKIN_DEPENDS roscpp sensor_msgs std_msgs
 # #  DEPENDS system_lib
 # )
@@ -240,40 +238,37 @@ catkin_package(
     Boost
     urdfdom_headers
   INCLUDE_DIRS "."
-  # LIBRARIES ${PROJECT_CORE} ${PROJECT_ROS_APP_NODE}
+  # LIBRARIES ${PROJECT_LIBRARY} ${PROJECT_EXEC_CSMLIO}
 )
 
-set(ROS_APP_SRCS 
-  ros_app/src/ros_app_node_main.cc
-  ros_app/src/ros_wrapper.cc
-  ros_app/src/ros_wrapper_options.cc
-  ros_app/src/time_conversion.cc
-  ros_app/src/msg_conversion.cc
-  ros_app/src/node_constants.cc
-  ros_app/src/trajectory_options.cc
-  ros_app/src/node_options.cc
-  ros_app/src/ros_log_sink.cc
-  ros_app/src/urdf_reader.cc
-  ros_app/src/tf_bridge.cc
-  # ros_app/src/
-  # ros_app/src/
-  # ros_app/src/
-  # ros_app/src/
-  # ros_app/src/
-  # ros_app/src/
+set(ROS_EXEC_SRCS 
+  infinityslam_ros/src/csmlio_node_main.cc
+  infinityslam_ros/src/ros_wrapper.cc
+  infinityslam_ros/src/ros_wrapper_options.cc
+  infinityslam_ros/src/time_conversion.cc
+  infinityslam_ros/src/msg_conversion.cc
+  infinityslam_ros/src/node_constants.cc
+  infinityslam_ros/src/trajectory_options.cc
+  infinityslam_ros/src/node_options.cc
+  infinityslam_ros/src/ros_log_sink.cc
+  infinityslam_ros/src/urdf_reader.cc
+  infinityslam_ros/src/tf_bridge.cc
+  # infinityslam_ros/src/
+  # infinityslam_ros/src/
+  # infinityslam_ros/src/
+  # infinityslam_ros/src/
+  # infinityslam_ros/src/
+  # infinityslam_ros/src/
 )
 
-set(PROJECT_ROS_APP_NODE "${PROJECT_NAME}_ros_app") #可执行文件名应与ROS节点名相同 
-add_executable(${PROJECT_ROS_APP_NODE} ${ROS_APP_SRCS})
+set(PROJECT_EXEC_CSMLIO "csmlio_ros_node") #可执行文件名与ROS节点名相同
+add_executable(${PROJECT_EXEC_CSMLIO} ${ROS_EXEC_SRCS})
 
-target_link_libraries(${PROJECT_ROS_APP_NODE} PUBLIC ${PROJECT_CORE})
-
-# yaml-cpp
-target_include_directories(${PROJECT_ROS_APP_NODE} SYSTEM PUBLIC ${YAML_CPP_INCLUDE_DIR})
+target_link_libraries(${PROJECT_EXEC_CSMLIO} PUBLIC ${PROJECT_LIBRARY})
 
 # PCL
-target_include_directories(${PROJECT_ROS_APP_NODE} SYSTEM PUBLIC ${PCL_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_ROS_APP_NODE} PUBLIC ${PCL_LIBRARIES})
+target_include_directories(${PROJECT_EXEC_CSMLIO} SYSTEM PUBLIC ${PCL_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_EXEC_CSMLIO} PUBLIC ${PCL_LIBRARIES})
 set(BLACKLISTED_PCL_DEFINITIONS " -march=native -msse4.2 -mfpmath=sse ")
 set(ROS_APP_COMPILE_FLAGS "${CXX_COMPILE_FLAGS}")
 foreach(DEFINITION ${PCL_DEFINITIONS})
@@ -284,23 +279,14 @@ foreach(DEFINITION ${PCL_DEFINITIONS})
   set(ROS_APP_COMPILE_FLAGS "${ROS_APP_COMPILE_FLAGS} ${DEFINITION}")
 endforeach()
 
-# Eigen
-target_include_directories(${PROJECT_ROS_APP_NODE} SYSTEM PUBLIC
-  "${EIGEN3_INCLUDE_DIR}")
-
-# Boost
-target_include_directories(${PROJECT_ROS_APP_NODE} SYSTEM PUBLIC
-  "${Boost_INCLUDE_DIRS}")
-target_link_libraries(${PROJECT_ROS_APP_NODE} PUBLIC ${Boost_LIBRARIES})
-
 # Catkin
-target_include_directories(${PROJECT_ROS_APP_NODE} SYSTEM PUBLIC ${catkin_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_ROS_APP_NODE} PUBLIC ${catkin_LIBRARIES})
-# add_dependencies(${PROJECT_ROS_APP_NODE} ${catkin_EXPORTED_TARGETS})
+target_include_directories(${PROJECT_EXEC_CSMLIO} SYSTEM PUBLIC ${catkin_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_EXEC_CSMLIO} PUBLIC ${catkin_LIBRARIES})
+# add_dependencies(${PROJECT_EXEC_CSMLIO} ${catkin_EXPORTED_TARGETS})
 
 # # Add the binary directory first, so that port.h is included after it has
 # # been generated.
-# target_include_directories(${PROJECT_ROS_APP_NODE} PUBLIC
+# target_include_directories(${PROJECT_EXEC_CSMLIO} PUBLIC
 #     $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
 #     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
 #     $<INSTALL_INTERFACE:include>
@@ -308,7 +294,7 @@ target_link_libraries(${PROJECT_ROS_APP_NODE} PUBLIC ${catkin_LIBRARIES})
 
 message(STATUS "######### CXX_COMPILE_FLAGS    : ${CXX_COMPILE_FLAGS}") 
 message(STATUS "######### ROS_APP_COMPILE_FLAGS: ${ROS_APP_COMPILE_FLAGS}")
-set_target_properties(${PROJECT_ROS_APP_NODE} PROPERTIES
+set_target_properties(${PROJECT_EXEC_CSMLIO} PROPERTIES
   COMPILE_FLAGS ${ROS_APP_COMPILE_FLAGS})
 
 
@@ -333,10 +319,10 @@ set_target_properties(${PROJECT_ROS_APP_NODE} PROPERTIES
 
 # add_library(${PROJECT_DYNC_REMOVER_NODE} STATIC ${DYNC_REMOVER_HDRS} ${DYNC_REMOVER_SRCS})
 
-# target_link_libraries(${PROJECT_DYNC_REMOVER_NODE} PUBLIC ${PROJECT_CORE})
+# target_link_libraries(${PROJECT_DYNC_REMOVER_NODE} PUBLIC ${PROJECT_LIBRARY})
 
 # # yaml-cpp
-# target_include_directories(${PROJECT_ROS_APP_NODE} SYSTEM PUBLIC ${YAML_CPP_INCLUDE_DIR})
+# target_include_directories(${PROJECT_EXEC_CSMLIO} SYSTEM PUBLIC ${YAML_CPP_INCLUDE_DIR})
 
 # # PCL
 # target_include_directories(${PROJECT_DYNC_REMOVER_NODE} SYSTEM PUBLIC ${PCL_INCLUDE_DIRS})

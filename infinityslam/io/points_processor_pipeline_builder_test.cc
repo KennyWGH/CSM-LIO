@@ -18,7 +18,7 @@
 
 #include <string>
 
-#include "infinityslam/common/port.h"
+#include "infinityslam/common/numeric_types.h"
 #include "infinityslam/io/file_writer.h"
 #include "gtest/gtest.h"
 

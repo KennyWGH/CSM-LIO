@@ -28,7 +28,7 @@
 #include "glog/logging.h"
 
 #include "infinityslam/common/math.h"
-#include "infinityslam/common/port.h"
+#include "infinityslam/common/numeric_types.h"
 #include "infinityslam/csmlio/submap/probability_values.h"
 #include "infinityslam/transform/transform.h"
 

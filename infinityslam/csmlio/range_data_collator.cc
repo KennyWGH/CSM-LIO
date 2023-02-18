@@ -36,7 +36,7 @@ RangeDataCollator::RangeDataCollator(
 }
 
 // wgh 2020年刚开始看Cartographer时第一个详细研究的类，梦开始的地方啊！[^*^]
-sensor::TimedPointCloudOriginData RangeDataCollator::AddRangeData(
+sensor::MultiTimedPOintCloudData RangeDataCollator::AddRangeData(
     const std::string& sensor_id,
     sensor::TimedPointCloudData timed_point_cloud_data) 
 {
@@ -85,9 +85,9 @@ sensor::TimedPointCloudOriginData RangeDataCollator::AddRangeData(
 }
 
 // wgh 将[current_start_,current_end_]时间段内的不同sensorId的数据按点时间戳顺序拼接在一起。
-sensor::TimedPointCloudOriginData RangeDataCollator::CropAndMerge() 
+sensor::MultiTimedPOintCloudData RangeDataCollator::CropAndMerge() 
 {
-  sensor::TimedPointCloudOriginData result{current_end_, {}, {}};
+  sensor::MultiTimedPOintCloudData result{current_end_, {}, {}};
   bool warned_for_dropped_points = false;
 
   // wgh 遍历缓存中所有sensor的数据
@@ -130,7 +130,7 @@ sensor::TimedPointCloudOriginData RangeDataCollator::CropAndMerge()
                             std::distance(overlap_begin, overlap_end));
       for (auto overlap_it = overlap_begin; overlap_it != overlap_end;
            ++overlap_it, ++intensities_overlap_it) {
-        sensor::TimedPointCloudOriginData::RangeMeasurement point{
+        sensor::MultiTimedPOintCloudData::RangeMeasurement point{
             *overlap_it, *intensities_overlap_it, origin_index};
         // current_end_ + point_time[3]_after == in_timestamp +
         // point_time[3]_before
@@ -161,8 +161,8 @@ sensor::TimedPointCloudOriginData RangeDataCollator::CropAndMerge()
 
   // 按时间重排来自不同sensor的所有点。
   std::sort(result.ranges.begin(), result.ranges.end(),
-            [](const sensor::TimedPointCloudOriginData::RangeMeasurement& a,
-               const sensor::TimedPointCloudOriginData::RangeMeasurement& b) {
+            [](const sensor::MultiTimedPOintCloudData::RangeMeasurement& a,
+               const sensor::MultiTimedPOintCloudData::RangeMeasurement& b) {
               return a.point_time.time < b.point_time.time;
             });
   return result;

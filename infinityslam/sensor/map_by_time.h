@@ -23,7 +23,7 @@
 #include <memory>
 #include <vector>
 
-#include "infinityslam/common/port.h"
+#include "infinityslam/common/numeric_types.h"
 #include "infinityslam/common/time.h"
 #include "infinityslam/csmlio/id.h"
 #include "glog/logging.h"

@@ -1,0 +1,64 @@
+<!--
+  Copyright 2022 WANG_Guanhua(wangxxx@gmail.com)
+-->
+
+<launch>
+  <param name="/use_sim_time" value="true" />
+
+  <param name="robot_description"
+    textfile="$(find infinityslam_ros)/infinityslam_ros/urdf/home_made_dataset.urdf" />
+
+  <node name="robot_state_publisher" pkg="robot_state_publisher"
+    type="robot_state_publisher" />
+
+  <node name="rviz" pkg="rviz" type="rviz" required="true"
+    args="-d $(find infinityslam_ros)/infinityslam_ros/rviz/csmlio_ui.rviz" />
+
+  <!-- 启动CSM-LIO节点 -->
+  <node name="csmlio_ros_node" pkg="infinityslam_ros"
+    type="csmlio_ros_node" args="
+      -ros_config_file $(find infinityslam_ros)/config/ros_config_file.yaml
+      -slam_config_file $(find infinityslam_ros)/config/slam_config_file.yaml"
+      output="screen">
+    <!-- <remap from="points2_1" to="horizontal_laser_3d" /> -->
+    <!-- <remap from="points2_2" to="vertical_laser_3d" /> -->
+    <!-- <remap from="points2" to="/zvision_lidar_points" /> -->
+    <!-- <remap from="points2" to="/os_cloud_node/points" /> -->
+    <!-- <remap from="points2" to="/rslidar_points" /> -->
+    <!-- <remap from="points2" to="rslidar_32_points" /> -->
+    <!-- <remap from="points2" to="rslidar_16_points" /> -->
+    <!-- <remap from="points2" to="/points_raw" /> -->
+    <!-- <remap from="points2" to="/velodyne_points_0" /> -->
+    <remap from="points2" to="/velodyne_points" />
+    <remap from="imu" to="/imu/data" />
+    <!-- <remap from="imu" to="/imu_raw" /> -->
+    <!-- <remap from="imu" to="/handsfree/imu" /> -->
+    
+  </node>
+
+  <!-- 自制数据集 -->
+  <arg name="bag_filename" default="/home/wgh/wgh_bags/2022-03-31-05-halfAroundBBlock.bag"/>
+
+  <!-- UrbanLoc数据集 -->
+  <!-- <arg name="bag_filename" default="/home/wgh/wgh_bags/HK-Data20190117.bag"/> -->
+
+  <!-- UrbanNav数据集 -->
+  <!-- <arg name="bag_filename" default="/home/wgh/wgh_bags/urbanNav/UrbanNav-HK_TST-20210517_sensors.bag"/> -->
+
+  <!-- M2DGR数据集 -->
+  <!-- <arg name="bag_filename" default="/home/wgh/wgh_bags/M2DGR/rotation_01.bag"/> -->
+
+  <!-- NCLT数据集 -->
+  <!-- <arg name="bag_filename" default="/home/wgh/wgh_bags/NCLTdataset_20130110.bag"/> -->
+  
+  <node name="playbag" pkg="rosbag" type="play"
+    args="--clock -s 0 -r 1.0 $(arg bag_filename)" />
+</launch>
+
+
+
+
+
+
+      <!-- -configuration_directory $(find infinityslam_ros)/config
+      -configuration_basename slam_config.lua -->

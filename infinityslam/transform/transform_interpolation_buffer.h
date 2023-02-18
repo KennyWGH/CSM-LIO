@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef CSMLIO_TRANSFORM_TRANSFORM_INTERPOLATION_BUFFER_H_
-#define CSMLIO_TRANSFORM_TRANSFORM_INTERPOLATION_BUFFER_H_
+#ifndef INFINITYSLAM_TRANSFORM_TRANSFORM_INTERPOLATION_BUFFER_H_
+#define INFINITYSLAM_TRANSFORM_TRANSFORM_INTERPOLATION_BUFFER_H_
 
 #include <deque>
 #include <limits>
@@ -80,4 +80,4 @@ class TransformInterpolationBuffer {
 }  // namespace transform
 }  // namespace infinityslam
 
-#endif  // CSMLIO_TRANSFORM_TRANSFORM_INTERPOLATION_BUFFER_H_
+#endif  // INFINITYSLAM_TRANSFORM_TRANSFORM_INTERPOLATION_BUFFER_H_

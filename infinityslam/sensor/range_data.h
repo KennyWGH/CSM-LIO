@@ -17,7 +17,7 @@
 #ifndef INFINITYSLAM_SENSOR_RANGE_DATA_H_
 #define INFINITYSLAM_SENSOR_RANGE_DATA_H_
 
-#include "infinityslam/common/port.h"
+#include "infinityslam/common/numeric_types.h"
 // #include "infinityslam/sensor/compressed_point_cloud.h"
 #include "infinityslam/sensor/point_cloud.h"
 

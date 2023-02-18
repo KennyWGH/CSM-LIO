@@ -1,18 +1,8 @@
-/*
- * Copyright 2017 The Cartographer Authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+/**
+ * Copyright 2022 WANG_Guanhua(wangxxx@gmail.com)
+ * Copyright 2016 The Cartographer Authors
+ * Licensed under the Apache License, Version 2.0 (the "License").
+*/
 
 #include <algorithm>
 #include "boost/make_unique.hpp"
@@ -30,8 +20,8 @@ PoseExtrapolator::PoseExtrapolator(
     : pose_queue_duration_(pose_queue_duration)
     , gravity_time_constant_(imu_gravity_time_constant)
     , cached_extrapolated_pose_{
-        common::ToSeconds(common::Time::min()), 
         common::Time::min(), 
+        common::ToSeconds(common::Time::min()), 
         transform::Rigid3d::Identity()} 
 {
     LOG(INFO) << "Constructed PoseExtrapolator with lua options.";
@@ -46,8 +36,8 @@ PoseExtrapolator::PoseExtrapolator(
         common::FromSeconds(full_options_.pose_extrap1_pose_queue_duration))
     , gravity_time_constant_(full_options_.pose_extrap1_imu_gravity_time_constant)
     , cached_extrapolated_pose_{
-        common::ToSeconds(common::Time::min()), 
         common::Time::min(), 
+        common::ToSeconds(common::Time::min()), 
         transform::Rigid3d::Identity()} 
 {
     LOG(INFO) << "Constructed PoseExtrapolator with common options.";
@@ -123,7 +113,7 @@ void PoseExtrapolator::AddPose(const common::Time time,
         imu_tracker_ =
             boost::make_unique<ImuTracker>(gravity_time_constant_, tracker_start);
     }
-    timed_pose_queue_.push_back(TimedPose{common::ToSeconds(time), time, pose});
+    timed_pose_queue_.push_back(TimedPose{time, common::ToSeconds(time), pose});
     while (timed_pose_queue_.size() > 2 &&
             timed_pose_queue_[1].time <= time - pose_queue_duration_) {
         timed_pose_queue_.pop_front();
@@ -192,7 +182,7 @@ transform::Rigid3d PoseExtrapolator::ExtrapolatePose(const common::Time time)
             newest_timed_pose.pose.rotation() *
             ExtrapolateRotation(time, extrapolation_imu_tracker_.get());
         cached_extrapolated_pose_ =
-            TimedPose{common::ToSeconds(time), time, 
+            TimedPose{time, common::ToSeconds(time), 
                 transform::Rigid3d{translation, rotation}};
     }
     return cached_extrapolated_pose_.pose;

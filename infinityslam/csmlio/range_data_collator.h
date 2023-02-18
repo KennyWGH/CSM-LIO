@@ -37,12 +37,12 @@ class RangeDataCollator {
 
     // If timed_point_cloud_data has incomplete intensity data, we will fill the
     // missing intensities with kDefaultIntensityValue.
-    sensor::TimedPointCloudOriginData AddRangeData(
+    sensor::MultiTimedPOintCloudData AddRangeData(
         const std::string& sensor_id,
         sensor::TimedPointCloudData timed_point_cloud_data);
 
   private:
-    sensor::TimedPointCloudOriginData CropAndMerge();
+    sensor::MultiTimedPOintCloudData CropAndMerge();
 
     const std::set<std::string> expected_sensor_ids_;
     // Store at most one message for each sensor.

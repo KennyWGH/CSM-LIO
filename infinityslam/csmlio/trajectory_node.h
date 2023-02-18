@@ -30,47 +30,47 @@ namespace infinityslam {
 namespace csmlio {
 
 struct TrajectoryNodePose {
-  struct ConstantPoseData {
-    common::Time time;
-    transform::Rigid3d local_pose;
-  };
-  // The node pose in the global SLAM frame.
-  transform::Rigid3d global_pose;
+    struct ConstantPoseData {
+        common::Time time;
+        transform::Rigid3d local_pose;
+    };
+    // The node pose in the global SLAM frame.
+    transform::Rigid3d global_pose;
 
-  common::optional<ConstantPoseData> constant_pose_data;
+    common::optional<ConstantPoseData> constant_pose_data;
 };
 
 struct TrajectoryNode {
-  struct Data {
-    common::Time time;
+    struct Data {
+        common::Time time;
 
-    // Transform to approximately gravity align the tracking frame as
-    // determined by local SLAM.
-    Eigen::Quaterniond gravity_alignment;
+        // Transform to approximately gravity align the tracking frame as
+        // determined by local SLAM.
+        Eigen::Quaterniond gravity_alignment;
 
-    // Used for loop closure in 2D: voxel filtered returns in the
-    // 'gravity_alignment' frame.
-    sensor::PointCloud filtered_gravity_aligned_point_cloud;
+        // Used for loop closure in 2D: voxel filtered returns in the
+        // 'gravity_alignment' frame.
+        sensor::PointCloud filtered_gravity_aligned_point_cloud;
 
-    // Used for loop closure in 3D.
-    sensor::PointCloud high_resolution_point_cloud;
-    sensor::PointCloud low_resolution_point_cloud;
-    Eigen::VectorXf rotational_scan_matcher_histogram;
+        // Used for loop closure in 3D.
+        sensor::PointCloud high_resolution_point_cloud;
+        sensor::PointCloud low_resolution_point_cloud;
+        Eigen::VectorXf rotational_scan_matcher_histogram;
 
-    // The node pose in the local SLAM frame.
-    transform::Rigid3d local_pose;
-  };
+        // The node pose in the local SLAM frame.
+        transform::Rigid3d local_pose;
+    };
 
-  common::Time time() const { return constant_data->time; }
+    common::Time time() const { return constant_data->time; }
 
-  int node_id;
+    int node_id;
 
-  // This must be a shared_ptr. If the data is used for visualization while the
-  // node is being trimmed, it must survive until all use finishes.
-  std::shared_ptr<const Data> constant_data;
+    // This must be a shared_ptr. If the data is used for visualization while the
+    // node is being trimmed, it must survive until all use finishes.
+    std::shared_ptr<const Data> constant_data;
 
-  // The node pose in the global SLAM frame.
-  transform::Rigid3d global_pose;
+    // The node pose in the global SLAM frame.
+    transform::Rigid3d global_pose;
 };
 
 

@@ -26,7 +26,7 @@
 #include <vector>
 
 #include "infinityslam/common/math.h"
-#include "infinityslam/common/port.h"
+#include "infinityslam/common/numeric_types.h"
 #include "infinityslam/common/time.h"
 
 namespace infinityslam {

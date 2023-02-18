@@ -1,2 +1,6 @@
 infinityslam/mapping
 infinityslam/free_space
+infinityslam_ros/src/online_mapping_*
+docs/InfinitySLAM*
+docs/README*
+docs/更新日志*

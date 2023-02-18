@@ -1,0 +1,32 @@
+<!--
+  Copyright 2022 WANG_Guanhua(wangxxx@gmail.com)
+-->
+
+<launch>
+  <param name="/use_sim_time" value="true" />
+
+  <param name="robot_description"
+    textfile="$(find infinityslam_ros)/infinityslam_ros/urdf/UrbanLoc_dataset.urdf" />
+
+  <node name="robot_state_publisher" pkg="robot_state_publisher"
+    type="robot_state_publisher" />
+
+  <node name="rviz" pkg="rviz" type="rviz" required="true"
+    args="-d $(find infinityslam_ros)/infinityslam_ros/rviz/csmlio_ui.rviz" />
+
+  <!-- 启动CSM-LIO节点 -->
+  <node name="csmlio_ros_node" pkg="infinityslam_ros"
+    type="csmlio_ros_node" args="
+      -ros_config_file $(find infinityslam_ros)/config/ros_config_file.yaml
+      -slam_config_file $(find infinityslam_ros)/config/slam_config_file.yaml"
+      output="screen">
+    <remap from="points2" to="/velodyne_points_0" />
+    <remap from="imu" to="/imu/data" />
+  </node>
+
+  <!-- UrbanLoc数据集 -->
+  <arg name="bag_filename" default="/home/wgh/wgh_bags/urbanLoc/HK-Data20190117.bag"/>
+  
+  <node name="playbag" pkg="rosbag" type="play"
+    args="--clock -s 100 -r 1.0 $(arg bag_filename)" />
+</launch>

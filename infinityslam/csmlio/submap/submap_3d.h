@@ -22,7 +22,7 @@
 #include <vector>
 #include "Eigen/Geometry"
 
-#include "infinityslam/common/port.h"
+#include "infinityslam/common/numeric_types.h"
 #include "infinityslam/sensor/range_data.h"
 #include "infinityslam/sensor/point_cloud.h"
 #include "infinityslam/transform/rigid_transform.h"

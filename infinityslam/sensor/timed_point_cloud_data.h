@@ -24,16 +24,17 @@
 namespace infinityslam {
 namespace sensor {
 
-// wgh ROS层向算法层传递点云数据的结构
+// 含原点信息的点云
 struct TimedPointCloudData {
   common::Time time;
-  Eigen::Vector3f origin;   // 通常是sensor_in_tracking的xyz坐标(静态TF).
+  Eigen::Vector3f origin;
   TimedPointCloud ranges;
-  // 'intensities' has to be same size as 'ranges', or empty.
+  // same size as 'ranges', or empty.
   std::vector<float> intensities;
 };
 
-struct TimedPointCloudOriginData {
+// 含(多个)原点信息的(多个)点云
+struct MultiTimedPOintCloudData {
   struct RangeMeasurement {
     PointTypeXYZT point_time;
     float intensity;

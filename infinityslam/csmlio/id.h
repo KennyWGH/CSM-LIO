@@ -28,7 +28,7 @@
 #include <vector>
 
 #include <boost/make_unique.hpp>
-#include "infinityslam/common/port.h"
+#include "infinityslam/common/numeric_types.h"
 #include "infinityslam/common/time.h"
 #include "glog/logging.h"
 

@@ -40,7 +40,7 @@ CSM-LIO 基本保留了 Cartographer 的前端算法流程（LocalTrajectoryBuil
 ## 4. 编译与运行（Compile and Run） //TODO
 配置第三方依赖：   
 > `XXX`   
-> yaml-cpp（ubuntu默认自带，若无请点[这里](https://github.com/jbeder/yaml-cpp)手动安装）   
+> yaml-cpp（ubuntu默认自带，若无请点[这里](https://github.com/jbeder/yaml-cpp)手动编译安装）   
 
 编译：   
 > mkdir -p XXX   

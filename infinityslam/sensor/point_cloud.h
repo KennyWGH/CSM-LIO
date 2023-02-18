@@ -1,23 +1,14 @@
-/*
+/**
+ * Copyright 2022 WANG_Guanhua(wangxxx@gmail.com)
  * Copyright 2016 The Cartographer Authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * Licensed under the Apache License, Version 2.0 (the "License").
+*/
 
 #ifndef INFINITYSLAM_SENSOR_POINT_CLOUD_H_
 #define INFINITYSLAM_SENSOR_POINT_CLOUD_H_
 
 #include <vector>
+#include <memory>
 
 #include "Eigen/Core"
 #include "infinityslam/sensor/point_type.h"
@@ -92,6 +83,8 @@ class PointCloud {
   // If non-empty, they must have the same size as points.
   std::vector<float> intensities_;
 };
+
+using PointCloudPtr = std::shared_ptr<PointCloud>;
 
 // Stores 3D positions of points with their relative measurement time in the
 // fourth entry. Time is in seconds, increasing and relative to the moment when

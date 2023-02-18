@@ -23,7 +23,7 @@
 #include <vector>
 
 #include "Eigen/Core"
-#include "infinityslam/common/port.h"
+#include "infinityslam/common/numeric_types.h"
 #include "infinityslam/csmlio/submap/hybrid_grid.h"
 #include "infinityslam/csmlio/scan_matching/precomputation_grid_3d.h"
 #include "infinityslam/csmlio/scan_matching/rotational_scan_matcher.h"

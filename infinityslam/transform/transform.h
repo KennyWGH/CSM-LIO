@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef CSMLIO_TRANSFORM_TRANSFORM_H_
-#define CSMLIO_TRANSFORM_TRANSFORM_H_
+#ifndef INFINITYSLAM_TRANSFORM_TRANSFORM_H_
+#define INFINITYSLAM_TRANSFORM_TRANSFORM_H_
 
 #include <cmath>
 
@@ -136,4 +136,4 @@ Rigid3<T> Embed3D(const Rigid2<T>& transform) {
 }  // namespace transform
 }  // namespace infinityslam
 
-#endif  // CSMLIO_TRANSFORM_TRANSFORM_H_
+#endif  // INFINITYSLAM_TRANSFORM_TRANSFORM_H_

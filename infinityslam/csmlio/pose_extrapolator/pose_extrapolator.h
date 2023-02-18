@@ -1,18 +1,8 @@
-/*
- * Copyright 2017 The Cartographer Authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+/**
+ * Copyright 2022 WANG_Guanhua(wangxxx@gmail.com)
+ * Copyright 2016 The Cartographer Authors
+ * Licensed under the Apache License, Version 2.0 (the "License").
+*/
 
 #ifndef INFINITYSLAM_CSMLIO_POSE_EXTRAPOLATOR_H_
 #define INFINITYSLAM_CSMLIO_POSE_EXTRAPOLATOR_H_
@@ -25,9 +15,9 @@
 #include "infinityslam/sensor/imu_data.h"
 #include "infinityslam/sensor/odometry_data.h"
 #include "infinityslam/transform/rigid_transform.h"
-#include "infinityslam/utils/utility.h"
+#include "infinityslam/transform/timed_pose.h"
 #include "infinityslam/csmlio/csm_lio_type_def.h"
-#include "infinityslam/csmlio/tools/imu_tracker.h"
+#include "infinityslam/utils/imu_tracker.h"
 #include "infinityslam/csmlio/pose_extrapolator/pose_extrapolator_interface.h"
 
 
@@ -38,7 +28,8 @@ namespace csmlio {
 // Uses the velocities to extrapolate motion. Uses IMU and/or odometry data if
 // available to improve the extrapolation.
 class PoseExtrapolator : public PoseExtrapolatorInterface {
-    using TimedPose = infinityslam::utils::TimedPose;
+    using TimedPose = infinityslam::transform::TimedPose;
+    using ImuTracker = infinityslam::utils::ImuTracker;
  public:
     explicit PoseExtrapolator(common::Duration pose_queue_duration,
                                 double imu_gravity_time_constant);

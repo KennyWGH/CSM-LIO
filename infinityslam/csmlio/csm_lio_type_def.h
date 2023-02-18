@@ -11,7 +11,7 @@
 #include <vector>
 #include <deque>
 
-#include "infinityslam/common/port.h"
+#include "infinityslam/common/numeric_types.h"
 #include "infinityslam/common/time.h"
 #include "infinityslam/sensor/imu_data.h"
 #include "infinityslam/sensor/odometry_data.h"

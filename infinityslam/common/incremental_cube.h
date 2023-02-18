@@ -11,7 +11,7 @@
 #include <cmath>
 #include <cstddef>
 #include <cassert>
-#include <limits>  // defines a numeric_limits class template for each of the fundamental types
+#include <limits>
 #include <array>
 #include <vector>
 #include <unordered_map>

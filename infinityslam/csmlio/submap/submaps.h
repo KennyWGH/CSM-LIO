@@ -23,7 +23,7 @@
 #include "glog/logging.h"
 
 #include "infinityslam/common/math.h"
-#include "infinityslam/common/port.h"
+#include "infinityslam/common/numeric_types.h"
 #include "infinityslam/common/system_options.h"
 #include "infinityslam/csmlio/id.h"
 #include "infinityslam/csmlio/submap/probability_values.h"

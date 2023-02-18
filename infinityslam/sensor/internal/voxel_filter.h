@@ -44,22 +44,24 @@ struct AdaptiveVoxelFIlterOpTions {
     double max_range_ = 60.;
 };
 
-std::vector<PointTypeXYZ> VoxelFilter(
-    const std::vector<PointTypeXYZ>& points, const float resolution);
+PointCloud AdaptiveVoxelFilter(const PointCloud& point_cloud,
+    const AdaptiveVoxelFIlterOpTions& options);
 
-PointCloud VoxelFilter(const PointCloud& point_cloud, const float resolution);
+std::vector<PointTypeXYZ> 
+VoxelFilter(const std::vector<PointTypeXYZ>& points, const float resolution);
 
-TimedPointCloud VoxelFilter(const TimedPointCloud& timed_point_cloud,
-                            const float resolution);
+PointCloud 
+VoxelFilter(const PointCloud& point_cloud, const float resolution);
 
-std::vector<sensor::TimedPointCloudOriginData::RangeMeasurement> VoxelFilter(
-    const std::vector<sensor::TimedPointCloudOriginData::RangeMeasurement>&
+TimedPointCloud 
+VoxelFilter(const TimedPointCloud& timed_point_cloud, const float resolution);
+
+std::vector<sensor::MultiTimedPOintCloudData::RangeMeasurement> 
+VoxelFilter(
+    const std::vector<sensor::MultiTimedPOintCloudData::RangeMeasurement>&
         range_measurements,
     const float resolution);
 
-PointCloud AdaptiveVoxelFilter(
-    const PointCloud& point_cloud,
-    const AdaptiveVoxelFIlterOpTions& options);
 
 }  // namespace sensor
 }  // namespace infinityslam

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef CSMLIO_TRANSFORM_RIGID_TRANSFORM_H_
-#define CSMLIO_TRANSFORM_RIGID_TRANSFORM_H_
+#ifndef INFINITYSLAM_TRANSFORM_RIGID_TRANSFORM_H_
+#define INFINITYSLAM_TRANSFORM_RIGID_TRANSFORM_H_
 
 #include <cmath>
 #include <iostream>
@@ -25,7 +25,7 @@
 #include "Eigen/Geometry"
 #include "absl/strings/substitute.h"
 #include "infinityslam/common/math.h"
-#include "infinityslam/common/port.h"
+#include "infinityslam/common/numeric_types.h"
 
 namespace infinityslam {
 namespace transform {
@@ -213,4 +213,4 @@ Eigen::Quaterniond RollPitchYaw(double roll, double pitch, double yaw);
 }  // namespace transform
 }  // namespace infinityslam
 
-#endif  // CSMLIO_TRANSFORM_RIGID_TRANSFORM_H_
+#endif  // INFINITYSLAM_TRANSFORM_RIGID_TRANSFORM_H_

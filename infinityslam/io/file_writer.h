@@ -21,7 +21,7 @@
 #include <functional>
 #include <memory>
 
-#include "infinityslam/common/port.h"
+#include "infinityslam/common/numeric_types.h"
 
 namespace infinityslam {
 namespace io {

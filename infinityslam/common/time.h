@@ -21,7 +21,7 @@
 #include <ostream>
 #include <ratio>
 
-#include "infinityslam/common/port.h"
+#include "infinityslam/common/numeric_types.h"
 
 namespace infinityslam {
 namespace common {
