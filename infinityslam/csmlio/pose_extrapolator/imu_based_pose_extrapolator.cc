@@ -213,7 +213,7 @@ ImuBasedPoseExtrapolator::ExtrapolatePosesWithGravity(
         TimestampedTransform{node_times.at(node_times.size() - 2),
                             nodes.at(nodes.size() - 2).ToRigid()};
     const transform::Rigid3d initial_estimate =
-        ExtrapolatePoseWithImu<double>(
+        utils::ExtrapolatePoseWithImu<double>(
             prev_gravity_from_tracking.transform, prev_gravity_from_tracking.time,
             prev_prev_gravity_from_tracking.transform,
             prev_prev_gravity_from_tracking.time,
@@ -259,18 +259,18 @@ ImuBasedPoseExtrapolator::ExtrapolatePosesWithGravity(
         const common::Time second_time = node_times[i];
 
         auto imu_it2 = imu_it;
-        const IntegrateImuResult<double> result =
-            IntegrateImu(imu_data_, first_time, second_time, &imu_it);
+        const utils::IntegrateImuResult<double> result =
+            utils::IntegrateImu(imu_data_, first_time, second_time, &imu_it);
         if ((i + 1) < nodes.size()) {
         const common::Time third_time = node_times[i + 1];
         const common::Duration first_duration = second_time - first_time;
         const common::Duration second_duration = third_time - second_time;
         const common::Time first_center = first_time + first_duration / 2;
         const common::Time second_center = second_time + second_duration / 2;
-        const IntegrateImuResult<double> result_to_first_center =
-            IntegrateImu(imu_data_, first_time, first_center, &imu_it2);
-        const IntegrateImuResult<double> result_center_to_center =
-            IntegrateImu(imu_data_, first_center, second_center, &imu_it2);
+        const utils::IntegrateImuResult<double> result_to_first_center =
+            utils::IntegrateImu(imu_data_, first_time, first_center, &imu_it2);
+        const utils::IntegrateImuResult<double> result_center_to_center =
+            utils::IntegrateImu(imu_data_, first_center, second_center, &imu_it2);
         // 'delta_velocity' is the change in velocity from the point in time
         // halfway between the first and second poses to halfway between
         // second and third pose. It is computed from IMU data and still

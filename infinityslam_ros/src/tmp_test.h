@@ -35,6 +35,9 @@
 #include "tf2_ros/transform_listener.h"
 #include <pcl_conversions/pcl_conversions.h>
 
+#include "infinityslam/sensor/imu_data.h"
+#include <sstream>
+
 
 namespace infinityslam_ros {
 
@@ -66,6 +69,54 @@ void ConvertSO3ToRPY() {
         << vec3i.cast<float>() << "\n" << vec3i.cast<float>() + 0.7958154f * Eigen::Vector3f::Ones(); 
     LOG(INFO) << "vector3i test2 for vector3f: \n" 
         << (vec3i + Eigen::Vector3i::Ones()) * 3 << "\n" << (vec3i + Eigen::Vector3i::Ones()).cast<float>() * 1.111; 
+}
+
+struct XewbopahcwSSS {
+    double a;
+    int b;
+    std::string c;
+    bool d;
+
+    std::string ToString() {
+        std::ostringstream oss;
+        oss << "a " << a << "; b " << b << "; c " << c << "; d " << d;
+        return oss.str();
+    }
+
+};
+
+void TestStructureInitialization() {
+
+
+    XewbopahcwSSS data1 = XewbopahcwSSS{1.0, 5, "sdsdd"};
+    XewbopahcwSSS data2 = XewbopahcwSSS{8.0, 777, "qvp;a"};
+    data2.d = true;
+    XewbopahcwSSS data3 = XewbopahcwSSS{0.429673};
+
+    LOG(INFO) << "test structure initializer: \n"
+        << "first: " << data1.ToString() << "\n"
+        << "second: " << data2.ToString() << "\n"
+        << "third: " << data3.ToString();
+
+    double double_var1 = 2356.4849375638;
+    double double_var2 = double_var1;
+    double double_var3 = 1.00000000;
+    double double_var4 = 0.99999999;
+    int int_var3 = double_var3;
+    int int_var4 = double_var4;
+    LOG(INFO) << "test double equality: \n"
+        << std::fixed << std::setprecision(18)
+        << "double_var1: " << double_var1 << "\n"
+        << "double_var2: " << double_var2 << "\n"
+        << "equal?: " << (double_var1 == double_var2) << "\n"
+        << "double_var3: " << double_var3 << "\n"
+        << "double_var4: " << double_var4 << "\n"
+        << "int_var3: " << int_var3 << "\n"
+        << "int_var4: " << int_var4;
+
+    
+
+
 }
 
 

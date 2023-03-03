@@ -190,6 +190,23 @@ sensor_msgs::PointCloud2 ToPointCloud2Message(
     return msg;
 }
 
+sensor_msgs::PointCloud2 ToPointCloud2Message(
+    const ::infinityslam::sensor::PointCloudXYZIT& point_cloud) 
+{
+    auto msg = PreparePointCloud2MessageWithIntensity(
+        ::infinityslam::common::ToUniversal(point_cloud.time_), 
+        point_cloud.frame_id_, 
+        point_cloud.points_.size());
+    ::ros::serialization::OStream stream(msg.data.data(), msg.data.size());
+    for (std::size_t i=0; i<point_cloud.points_.size(); ++i) {
+        stream.next(point_cloud.points_[i].position.x());
+        stream.next(point_cloud.points_[i].position.y());
+        stream.next(point_cloud.points_[i].position.z());
+        stream.next(point_cloud.points_[i].intensity);
+    }
+    return msg;
+}
+
 std::tuple<::infinityslam::sensor::PointCloudWithIntensities,
            ::infinityslam::common::Time>
 ToPointCloudWithIntensities(const sensor_msgs::PointCloud2& msg) 
@@ -199,48 +216,48 @@ ToPointCloudWithIntensities(const sensor_msgs::PointCloud2& msg)
     // a PointCloud2 without intensity.
     if (PointCloud2HasField(msg, "intensity")) {
         if (PointCloud2HasField(msg, "time")) {
-        pcl::PointCloud<PointXYZIT> pcl_point_cloud;
-        pcl::fromROSMsg(msg, pcl_point_cloud);
-        point_cloud.points.reserve(pcl_point_cloud.size());
-        point_cloud.intensities.reserve(pcl_point_cloud.size());
-        for (const auto& point : pcl_point_cloud) {
-            point_cloud.points.push_back(
-                {Eigen::Vector3f{point.x, point.y, point.z}, point.time});
-            point_cloud.intensities.push_back(point.intensity);
-        }
+            pcl::PointCloud<PointXYZIT> pcl_point_cloud;
+            pcl::fromROSMsg(msg, pcl_point_cloud);
+            point_cloud.points.reserve(pcl_point_cloud.size());
+            point_cloud.intensities.reserve(pcl_point_cloud.size());
+            for (const auto& point : pcl_point_cloud) {
+                point_cloud.points.push_back(
+                    {Eigen::Vector3f{point.x, point.y, point.z}, point.time});
+                point_cloud.intensities.push_back(point.intensity);
+            }
         } else {
-        pcl::PointCloud<pcl::PointXYZI> pcl_point_cloud;
-        pcl::fromROSMsg(msg, pcl_point_cloud);
-        point_cloud.points.reserve(pcl_point_cloud.size());
-        point_cloud.intensities.reserve(pcl_point_cloud.size());
-        for (const auto& point : pcl_point_cloud) {
-            point_cloud.points.push_back(
-                {Eigen::Vector3f{point.x, point.y, point.z}, 0.f}); //时间戳置零
-            point_cloud.intensities.push_back(point.intensity);
-        }
+            pcl::PointCloud<pcl::PointXYZI> pcl_point_cloud;
+            pcl::fromROSMsg(msg, pcl_point_cloud);
+            point_cloud.points.reserve(pcl_point_cloud.size());
+            point_cloud.intensities.reserve(pcl_point_cloud.size());
+            for (const auto& point : pcl_point_cloud) {
+                point_cloud.points.push_back(
+                    {Eigen::Vector3f{point.x, point.y, point.z}, 0.f}); //时间戳置零
+                point_cloud.intensities.push_back(point.intensity);
+            }
         }
     } else {
         // If we don't have an intensity field, just copy XYZ and fill in 1.0f.
         if (PointCloud2HasField(msg, "time")) {
-        pcl::PointCloud<PointXYZT> pcl_point_cloud;
-        pcl::fromROSMsg(msg, pcl_point_cloud);
-        point_cloud.points.reserve(pcl_point_cloud.size());
-        point_cloud.intensities.reserve(pcl_point_cloud.size());
-        for (const auto& point : pcl_point_cloud) {
-            point_cloud.points.push_back(
-                {Eigen::Vector3f{point.x, point.y, point.z}, point.time});
-            point_cloud.intensities.push_back(1.0f);
-        }
+            pcl::PointCloud<PointXYZT> pcl_point_cloud;
+            pcl::fromROSMsg(msg, pcl_point_cloud);
+            point_cloud.points.reserve(pcl_point_cloud.size());
+            point_cloud.intensities.reserve(pcl_point_cloud.size());
+            for (const auto& point : pcl_point_cloud) {
+                point_cloud.points.push_back(
+                    {Eigen::Vector3f{point.x, point.y, point.z}, point.time});
+                point_cloud.intensities.push_back(1.0f);
+            }
         } else {
-        pcl::PointCloud<pcl::PointXYZ> pcl_point_cloud;
-        pcl::fromROSMsg(msg, pcl_point_cloud);
-        point_cloud.points.reserve(pcl_point_cloud.size());
-        point_cloud.intensities.reserve(pcl_point_cloud.size());
-        for (const auto& point : pcl_point_cloud) {
-            point_cloud.points.push_back(
-                {Eigen::Vector3f{point.x, point.y, point.z}, 0.f});
-            point_cloud.intensities.push_back(1.0f);
-        }
+            pcl::PointCloud<pcl::PointXYZ> pcl_point_cloud;
+            pcl::fromROSMsg(msg, pcl_point_cloud);
+            point_cloud.points.reserve(pcl_point_cloud.size());
+            point_cloud.intensities.reserve(pcl_point_cloud.size());
+            for (const auto& point : pcl_point_cloud) {
+                point_cloud.points.push_back(
+                    {Eigen::Vector3f{point.x, point.y, point.z}, 0.f});
+                point_cloud.intensities.push_back(1.0f);
+            }
         }
     }
     // 把帧的时间戳移动到最后一个点（而非ROS格式中的第一个点）
@@ -276,22 +293,94 @@ ToPointCloudWithIntensities(const sensor_msgs::PointCloud2& msg)
     return std::make_tuple(point_cloud, timestamp);
 }
 
-::infinityslam::common::Time GetPC2StartTime(
-    const sensor_msgs::PointCloud2& msg)
-{
-    return FromRos(msg.header.stamp);
+::infinityslam::sensor::PointCloudXYZIT
+ToPointCloudXYZIT(const sensor_msgs::PointCloud2& msg) {
+    ::infinityslam::sensor::PointCloudXYZIT point_cloud;
+    if (PointCloud2HasField(msg, "intensity")) {
+        if (PointCloud2HasField(msg, "time")) {
+            pcl::PointCloud<PointXYZIT> pcl_point_cloud;
+            pcl::fromROSMsg(msg, pcl_point_cloud);
+            point_cloud.points_.reserve(pcl_point_cloud.size());
+            for (const auto& point : pcl_point_cloud) {
+                point_cloud.points_.push_back(
+                    {Eigen::Vector3f{point.x, point.y, point.z}, point.intensity, point.time});
+            }
+        } else {
+            pcl::PointCloud<pcl::PointXYZI> pcl_point_cloud;
+            pcl::fromROSMsg(msg, pcl_point_cloud);
+            point_cloud.points_.reserve(pcl_point_cloud.size());
+            for (const auto& point : pcl_point_cloud) {
+                point_cloud.points_.push_back(
+                    {Eigen::Vector3f{point.x, point.y, point.z}, point.intensity, 0.f});
+            }
+        }
+    } else {
+        if (PointCloud2HasField(msg, "time")) {
+            pcl::PointCloud<PointXYZT> pcl_point_cloud;
+            pcl::fromROSMsg(msg, pcl_point_cloud);
+            point_cloud.points_.reserve(pcl_point_cloud.size());
+            for (const auto& point : pcl_point_cloud) {
+                point_cloud.points_.push_back(
+                    {Eigen::Vector3f{point.x, point.y, point.z}, 1.f, point.time});
+            }
+        } else {
+            pcl::PointCloud<pcl::PointXYZ> pcl_point_cloud;
+            pcl::fromROSMsg(msg, pcl_point_cloud);
+            point_cloud.points_.reserve(pcl_point_cloud.size());
+            for (const auto& point : pcl_point_cloud) {
+                point_cloud.points_.push_back(
+                    {Eigen::Vector3f{point.x, point.y, point.z}, 1.f, 0.f});
+            }
+        }
+    }
+
+    // 把帧的时间戳移动到最后一个点（而非ROS格式中的第一个点）
+    ::infinityslam::common::Time timestamp = FromRos(msg.header.stamp);
+    if (!point_cloud.points_.empty()) {
+        const auto& all_points = point_cloud.points_;
+        const double duration = all_points.back().time;
+        if (duration > 0.105) {
+            LOG(INFO) << "Found the largest point stamp inside point cloud "
+                "(frame_id: " << msg.header.frame_id << ") larger than 100ms, "
+                "which is " << int(duration * 1000) << "ms.";
+        }
+        timestamp += infinityslam::common::FromSeconds(duration);
+        for (auto& point : point_cloud.points_) {
+            point.time -= duration;
+            if (point.time > 0.f) {
+                LOG(WARNING) << "Encountered a point with a larger stamp"
+                    " than the last point in the cloud, will copy the last"
+                    " point to overwrite it.";
+                point = point_cloud.points_.back();
+                // point.time -= duration;
+                point.time = 0;
+            }
+        }
+    }
+    point_cloud.time_ = timestamp;
+    point_cloud.timestamp_ = ::infinityslam::common::ToSeconds(timestamp);
+    point_cloud.seq_ = msg.header.seq;
+    point_cloud.frame_id_ = msg.header.frame_id;
+
+    return point_cloud;
 }
 
-::infinityslam::common::Time GetPC2EndTime(
+double GetPC2StartTime(
+    const sensor_msgs::PointCloud2& msg)
+{
+    return RosToUniversal(msg.header.stamp);
+}
+
+double GetPC2EndTime(
     const sensor_msgs::PointCloud2& msg) 
 {
     if (PointCloud2HasField(msg, "time")) {
         pcl::PointCloud<PointXYZT> pcl_point_cloud;
         pcl::fromROSMsg(msg, pcl_point_cloud);
-        float largest_point_time = 0;
+        float max_time = 0;
         for (auto& point : pcl_point_cloud.points) {
-            if (point.time > largest_point_time)
-                largest_point_time = point.time;
+            if (point.time > max_time)
+                max_time = point.time;
         }
 
         // { // debug.
@@ -305,15 +394,15 @@ ToPointCloudWithIntensities(const sensor_msgs::PointCloud2& msg)
         //         << ", compared with " << pcl_point_cloud.points.back().time << ".";
         // }
 
-        return FromRos(msg.header.stamp) + 
-            ::infinityslam::common::FromSeconds(largest_point_time);
+        return RosToUniversal(msg.header.stamp) + max_time;
     } 
+
     if (warned_table.find(msg.header.frame_id) == warned_table.end()) {
         LOG(WARNING) << "Found no 'time' field for point cloud message with frame_id '" 
             << msg.header.frame_id << "'.";
         warned_table[msg.header.frame_id] = true;
     }
-    return FromRos(msg.header.stamp);
+    return RosToUniversal(msg.header.stamp);
 }
 
 Rigid3d ToRigid3d(const geometry_msgs::TransformStamped& transform) 

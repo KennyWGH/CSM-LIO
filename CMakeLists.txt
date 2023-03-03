@@ -243,7 +243,7 @@ catkin_package(
 
 set(ROS_EXEC_SRCS 
   infinityslam_ros/src/csmlio_node_main.cc
-  infinityslam_ros/src/ros_wrapper.cc
+  infinityslam_ros/src/csmlio_wrapper.cc
   infinityslam_ros/src/ros_wrapper_options.cc
   infinityslam_ros/src/time_conversion.cc
   infinityslam_ros/src/msg_conversion.cc

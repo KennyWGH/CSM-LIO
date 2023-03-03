@@ -22,7 +22,6 @@
 #include "Eigen/Core"
 #include "Eigen/Geometry"
 #include "infinityslam/common/math.h"
-// #include "infinityslam/transform/proto/transform.pb.h"
 #include "infinityslam/transform/rigid_transform.h"
 
 namespace infinityslam {
@@ -114,24 +113,6 @@ Rigid3<T> Embed3D(const Rigid2<T>& transform) {
                           Eigen::Matrix<T, 3, 1>::UnitZ()));
 }
 
-// // Conversions between Eigen and proto.
-// Rigid2d ToRigid2(const proto::Rigid2d& transform);
-// Eigen::Vector2d ToEigen(const proto::Vector2d& vector);
-// Eigen::Vector3f ToEigen(const proto::Vector3f& vector);
-// Eigen::Vector4f ToEigen(const proto::Vector4f& vector);
-// Eigen::Vector3d ToEigen(const proto::Vector3d& vector);
-// Eigen::Quaterniond ToEigen(const proto::Quaterniond& quaternion);
-// proto::Rigid2d ToProto(const Rigid2d& transform);
-// proto::Rigid2f ToProto(const Rigid2f& transform);
-// proto::Rigid3d ToProto(const Rigid3d& rigid);
-// Rigid3d ToRigid3(const proto::Rigid3d& rigid);
-// proto::Rigid3f ToProto(const Rigid3f& rigid);
-// proto::Vector2d ToProto(const Eigen::Vector2d& vector);
-// proto::Vector3f ToProto(const Eigen::Vector3f& vector);
-// proto::Vector4f ToProto(const Eigen::Vector4f& vector);
-// proto::Vector3d ToProto(const Eigen::Vector3d& vector);
-// proto::Quaternionf ToProto(const Eigen::Quaternionf& quaternion);
-// proto::Quaterniond ToProto(const Eigen::Quaterniond& quaternion);
 
 }  // namespace transform
 }  // namespace infinityslam

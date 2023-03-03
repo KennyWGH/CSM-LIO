@@ -13,7 +13,7 @@ namespace transform {
 
 struct TimedPose {
     common::Time time;
-    double timestamp = 0;
+    double timestamp;
     transform::Rigid3d pose;
 
     TimedPose () {}

@@ -26,8 +26,21 @@
 namespace infinityslam {
 namespace common {
 
+/**
+ * 我们区分几个时间概念：
+ * -- 1. Universal Time Scale, 世界时/or格林威治时间；
+ * -- 2. Universal Time Coordinated, UTC时间/or协调世界时，以原子时秒长为基础，
+ *       在时刻上尽量接近于世界时的一种时间计量系统；
+ * -- 3. Unix时间，从协调世界时1970年1月1日0时0分0秒起至现在的总秒数，
+ *       也即以UTC"1970-01-01 00:00:00.0 +0000"为零时刻，以原子钟秒长作为计秒单位；
+ * -- 4. Universal时间，以UTC"0001-01-01 00:00:00.0 +0000"起至现在的总秒数；
+ * 
+ * -- 一、在本项目中，为了避免时间出现负数，我们统一使用Universal时间；
+ * -- 二、大多数驱动给出的数据时刻都取计算机时刻，也即Unix时间；（包括ROS吗）
+ * -- 三、Universal时间与Unix时间，两者相差719162天，约6.21356e10秒。
+*/
 constexpr int64 kUtsEpochOffsetFromUnixEpochInSeconds =
-    (719162ll * 24ll * 60ll * 60ll);
+    (719162ll * 24ll * 60ll * 60ll); 
 
 struct UniversalTimeScaleClock {
   using rep = int64;
@@ -51,7 +64,7 @@ Duration FromMilliseconds(int64 milliseconds);
 double ToSeconds(Duration duration);
 double ToSeconds(std::chrono::steady_clock::duration duration);
 
-// 返回Unix纪元时间到当前时间的秒数。
+// Returns the given time point in seconds.
 double ToSeconds(Time time_point);
 
 // Creates a time from a Universal Time Scale.

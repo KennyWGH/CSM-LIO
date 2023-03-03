@@ -19,21 +19,32 @@ namespace sensor {
 // 基础点类型
 struct PointTypeXYZ {
   Eigen::Vector3f position;
-};
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+} EIGEN_ALIGN16;
 
 // 基础点类型，含相对时间
 struct PointTypeXYZT {
   Eigen::Vector3f position;
   float time;
-};
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+} EIGEN_ALIGN16;
+
+// 基础点类型，含intensity、相对时间
+struct PointTypeXYZIT {
+  Eigen::Vector3f position;
+  float intensity;
+  float time;
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+} EIGEN_ALIGN16;
 
 // 全量点类型，含intensity、相对时间、和label
 struct PointTypeXYZITL {
   Eigen::Vector3f position;
   float intensity;
   float time;
-  int label; //【规定：-1动态、0未知、1静态】
-};
+  uint8_t label; //【规定：-1动态、0未知、1静态】
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+} EIGEN_ALIGN16;
 
 // 点的动静态属性标签
 constexpr int LABEL_DYNAMIC = -1;

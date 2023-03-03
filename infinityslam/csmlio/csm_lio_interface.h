@@ -14,7 +14,7 @@ namespace infinityslam {
 namespace csmlio {
 
 class CSMLioInterface {
-  public:
+   public:
 
     CSMLioInterface() {}
     ~CSMLioInterface() {}
@@ -32,7 +32,7 @@ class CSMLioInterface {
     virtual void ProcessSensorData(const std::string& sensor_id,
                             const sensor::OdometryData& odometry_data) = 0;
 
-  private:
+   private:
 
 };
 

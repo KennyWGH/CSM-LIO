@@ -31,8 +31,12 @@
 
 
 #include "infinityslam/common/time.h"
+#include "infinityslam/common/optional.h"
 #include "infinityslam/common/fixed_ratio_sampler.h"
+#include "infinityslam/sensor/point_cloud_type.h"
 #include "infinityslam/transform/timed_pose.h"
+#include "infinityslam/utils/imu_aided_pose_interpolator.h"
+#include "infinityslam/utils/motion_compensator.h"
 #include "infinityslam/csmlio/csm_lio_type_def.h"
 #include "infinityslam/csmlio/csm_lidar_inertial_odometry.h"
 
@@ -42,7 +46,7 @@
 
 namespace infinityslam_ros {
 
-struct RosWrapperOptions {
+struct CSMLioWraPperOptions {
     std::string map_frame = "map";
     std::string tracking_frame = "base_link";
     std::string published_frame = "base_link";
@@ -70,14 +74,15 @@ struct RosWrapperOptions {
     double landmarks_sampling_ratio = 1.;
 };
 
-RosWrapperOptions ReadRosWrapperOptions();
+CSMLioWraPperOptions ReadCSMLioWraPperOptions();
 
-// Wires up ROS topics to SLAM.
-class Node {
+// Wires up ROS topics to SLAM. CSMLioWrapper
+class CSMLioWrapper {
   public:
-    using Rigid3d = ::infinityslam::transform::Rigid3d;
-    using TimedPose = ::infinityslam::transform::TimedPose;
-    using ImuData = ::infinityslam::sensor::ImuData;
+    using Rigid3d           = ::infinityslam::transform::Rigid3d;
+    using TimedPose         = ::infinityslam::transform::TimedPose;
+    using ImuData           = ::infinityslam::sensor::ImuData;
+    using PointCloudXYZIT   = ::infinityslam::sensor::PointCloudXYZIT;
     
     struct SlamKeyframeData {
         struct LioKeyframeData {
@@ -93,17 +98,17 @@ class Node {
         // TrajectoryOptions trajectory_options;
     };
 
-    Node(const RosWrapperOptions& ros_options,
+    CSMLioWrapper(const CSMLioWraPperOptions& ros_options,
         tf2_ros::Buffer* tf_buffer);
 
-    // Node(const std::string& ros_config_file,
+    // CSMLioWrapper(const std::string& ros_config_file,
     //     const std::string& slam_config_file,
     //     tf2_ros::Buffer* tf_buffer) {/*TODO*/}
 
-    ~Node();
+    ~CSMLioWrapper();
 
-    Node(const Node&) = delete;
-    Node& operator=(const Node&) = delete;
+    CSMLioWrapper(const CSMLioWrapper&) = delete;
+    CSMLioWrapper& operator=(const CSMLioWrapper&) = delete;
 
     bool Start();
 
@@ -139,19 +144,17 @@ class Node {
     // Returns the set of SensorIds expected for a trajectory.
     // 'SensorId::id' is the expected ROS topic name.
     std::set<::infinityslam::csmlio::SensorId>
-    ComputeExpectedSensorIds(const RosWrapperOptions& options) const;
+    ComputeExpectedSensorIds(const CSMLioWraPperOptions& options) const;
 
-    void LaunchSubscribers(const RosWrapperOptions& options);
-    void AddSensorSamplers(const RosWrapperOptions& options);
+    void LaunchSubscribers(const CSMLioWraPperOptions& options);
+    void AddSensorSamplers(const CSMLioWraPperOptions& options);
 
-    void PublishSlamResultData(const ::ros::TimerEvent& timer_event);
+    void PublishLioResultData(const ::ros::TimerEvent& timer_event);
     void PublishSlamTrajectory(const ::ros::WallTimerEvent& timer_event);
     void PublishSubmapList(const ::ros::WallTimerEvent& timer_event);
     void PublishGlobalMapPC(const ::ros::WallTimerEvent& timer_event);
 
-    void TriggerPostProcOnce(const ::ros::TimerEvent& timer_event);
-
-    bool ValidateTopicNames(const RosWrapperOptions& options);
+    bool ValidateTopicNames(const CSMLioWraPperOptions& options);
     void MaybeWarnAboutTopicMismatch(const ::ros::WallTimerEvent&);
 
     void OnLioResult(const ::infinityslam::common::Time time,
@@ -161,10 +164,11 @@ class Node {
                             std::unique_ptr<const ::infinityslam::csmlio::InsertionResult> insertion_result)
         LOCKS_EXCLUDED(result_mutex_);
 
+    // 后处理线程：对kf进行运动补偿并publish
     void PerformPostProcKfLoop();
 
     // 数据成员。
-    const RosWrapperOptions ros_wrapper_Options_;
+    const CSMLioWraPperOptions ros_wrapper_Options_;
     tf2_ros::Buffer* const tf_buffer_;
     tf2_ros::TransformBroadcaster tf_broadcaster_;
     std::unique_ptr<TfBridge> tf_bridge_;
@@ -180,7 +184,7 @@ class Node {
     // 但为了保险起见，我们还是保留这一保护方式。
     // 参见：http://wiki.ros.org/roscpp/Overview/Callbacks%20and%20Spinning
     // 另外，本类中需要两个锁，别忘了这一个类相当于原版的[Node类+MapBuilderBridge类]。
-    std::mutex inner_mutex_;   //对几乎所有成员的访问都需要加锁
+    std::mutex member_mutex_;   //对几乎所有成员的访问都需要加锁
     std::mutex result_mutex_;   //保护核心层送出来的LioResult数据 
 
     // SLAM返回的最新数据放在这里，访问需要加锁。
@@ -206,6 +210,7 @@ class Node {
     ::ros::Publisher slam_key_frame_pc_publisher_;
     ::ros::Publisher slam_trajectory_path_publisher_;
     ::ros::Publisher slam_current_speed_publisher_;
+    ::ros::Publisher slam_interp_traj_publisher_;
 
     // The timer for publishing local trajectory data (i.e. pose transforms and
     // range data point clouds) is a regular timer which is not triggered when
@@ -213,7 +218,6 @@ class Node {
     // listener buffer by publishing the same transforms over and over again.
     // 相比于WallTimer使用系统时间,Timer会在使用bag包时遵从bag包的时间。
     ::ros::Timer publish_slam_result_timer_;
-    ::ros::Timer trigger_postproc_timer_;
 
     // We have to keep the timer handles of ::ros::WallTimers around, otherwise
     // they do not fire.
@@ -243,7 +247,7 @@ class Node {
     // publishers 相关变量。
     ::infinityslam::common::Time last_published_slam_result_time_ 
         = ::infinityslam::common::Time::min();
-    sensor_msgs::PointCloud2 submap_cloud_ros_pc2_;
+    sensor_msgs::PointCloud2 submap_ros_pc2_;
     sensor_msgs::PointCloud2 global_map_ros_pc2_;
     int last_published_global_map_kf_id_ = -1;
 
@@ -252,6 +256,13 @@ class Node {
      * 利用配准位姿队列和imu队列，配合tracking到snsor的静态tf查询，对lidar点云去畸变；
      * 需要做的：1-imu原始数据缓存队列；2-配准位姿缓存队列；3-位姿近似平滑插值（在核心层实现此函数）；
      * 4-支持对【任何能够查询到相对tf的LiDAR】做点云去畸变；5-开单独线程做这个事。
+     * 
+     * 
+     * 用单独线程做后处理：把各个lidar的原始点云对齐到同一时刻，然后发送，这里的时刻与keyframe时刻无关。
+     * -- step1 出现新的位姿时（触发此线程），位姿内插器捕获位姿；
+     * -- step2 在当前累积原始点云所覆盖的时段（也可以是keyframe时段）上，用【PoseInterpolator】查询【插值位姿表】；
+     * -- step3 查询sensor2tracking的静态tf，结合【MotionCompensator】做点云时间对齐；
+     * -- step4 格式转换为ROS，发送点云，结束。
     */
 
     // 后处理线程，从LiDAR原始点云合成关键帧并去畸变。
@@ -262,20 +273,20 @@ class Node {
     std::atomic_bool quit_postproc_flag_ {false};
 
     // 合成关键帧和去畸变所需的“原料”；点云数据以ROS/PC2格式[推荐]保存【本段数据被两个线程访问，所有访问都需要加锁】
-    const double kDataCacheMaxTimeToKeep = 10.;
-    using PointCloudQueue = std::deque<sensor_msgs::PointCloud2Ptr>;
+    const double kDataCacheMaxTimeToKeep = 60.;
+    using PointCloudQueue = std::deque<PointCloudXYZIT::Ptr>;
     using PointCloudQueuePtr = std::shared_ptr<PointCloudQueue>;
     std::unordered_map<std::string, PointCloudQueuePtr> point_cloud_queues_; //保存LiDAR坐标系下的原始点云。
-    std::deque<ImuData> imu_queue_;         //这里的IMU数据已经转换到tracking坐标系下了。
-    std::deque<TimedPose> timed_pose_queue_;        //由lio输出的tracking坐标系的位姿。
-    ::infinityslam::common::Time last_processed_kf_time_ = ::infinityslam::common::Time::min();
-    std::unordered_map<std::string, ::infinityslam::transform::Rigid3d> lidars_to_tracking_;
+    std::unordered_map<std::string, Rigid3d> sensors_to_tracking_;
+
+    // 原始点云去运动畸变【本身就是多线程安全的】
+    std::unique_ptr<::infinityslam::utils::ImuAidedPoseInterpolator> pose_interpolator_;
+    std::unique_ptr<::infinityslam::utils::MotionCompensator> motion_compensator_;
 
     // 去畸变所需的数据段【以下数据仅在独立线程中被访问，无需加锁】
-    std::vector<ImuData> imu_data_segment_;
-    std::vector<TimedPose> timed_pose_segment_;
-    std::vector<sensor_msgs::PointCloud2Ptr> pc2_data_segment_;
-    std::vector<std::pair<std::string, ::infinityslam::transform::Rigid3d>> lidars_to_tracking_vec_;
+    std::vector<PointCloudXYZIT::Ptr> pc2_data_segment_;
+    ::infinityslam::common::optional<double> last_processed_kf_time_;
+    std::vector<std::pair<std::string, Rigid3d>> lidars_in_tracking_;
     size_t postproc_kf_id = 0;
 
     // 默认相对于end时刻构建RelativePoseTable，以便与算法保持一致。
@@ -287,10 +298,10 @@ class Node {
     // 考虑若干个坐标系的关系：tracking系，imu系，sensor系。
     // 合理的做法是：在tracking系下做插值和构建RelativePoseTable，然后乘以“tracking2sensor”
     // 得到sensor的RelativePoseTable，这样做的另一个好处是可以避免对每一个LiDAR都重复插值过程。
-    std::vector<TimedPose> relative_pose_table_;
+    std::vector<TimedPose> interp_pose_table_;
 
     // 发布去畸变后的（合成）关键帧点云
-    ::ros::Publisher slam_postproc_kf_pc_publisher_;
+    ::ros::Publisher slam_postproc_pointcloud_publisher_;
 
 };
 

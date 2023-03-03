@@ -33,4 +33,15 @@ namespace infinityslam_ros {
         (time.nsec + 50) / 100);  // + 50 to get the rounding correct.
 }
 
+::ros::Time UniversalToRos(double time) {
+    const double unix_time = 
+        time - ::infinityslam::common::kUtsEpochOffsetFromUnixEpochInSeconds;
+    return ::ros::Time(unix_time);
+}
+
+double RosToUniversal(const ::ros::Time& time) {
+    return double(::infinityslam::common::kUtsEpochOffsetFromUnixEpochInSeconds 
+                    + time.sec + time.nsec * 1e-9);
+}
+
 }  // namespace infinityslam_ros

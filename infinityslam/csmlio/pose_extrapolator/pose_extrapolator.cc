@@ -41,8 +41,8 @@ PoseExtrapolator::PoseExtrapolator(
         transform::Rigid3d::Identity()} 
 {
     LOG(INFO) << "Constructed PoseExtrapolator with common options.";
-    LOG(INFO) << " ** pose_queue_duration_ = " << common::ToSeconds(pose_queue_duration_);
-    LOG(INFO) << " ** gravity_time_constant_ = " << gravity_time_constant_;
+    LOG(INFO) << " [PARAM] pose_queue_duration_ = " << common::ToSeconds(pose_queue_duration_);
+    LOG(INFO) << " [PARAM] gravity_time_constant_ = " << gravity_time_constant_;
 }
 
 std::unique_ptr<PoseExtrapolator> PoseExtrapolator::InitializeWithImu(

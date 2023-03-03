@@ -9,6 +9,7 @@
 
 #include "infinityslam/common/time.h"
 #include "infinityslam/sensor/point_cloud.h"
+#include "infinityslam/sensor/point_cloud_type.h"
 #include "infinityslam/transform/rigid_transform.h"
 
 #include "geometry_msgs/Pose.h"
@@ -28,6 +29,9 @@ sensor_msgs::PointCloud2 ToPointCloud2Message(
     int64_t timestamp, const std::string& frame_id,
     const ::infinityslam::sensor::PointCloudWithIntensities& point_cloud);
 
+sensor_msgs::PointCloud2 ToPointCloud2Message(
+    const ::infinityslam::sensor::PointCloudXYZIT& point_cloud);
+
 // Converts ROS message to point cloud. Returns the time when the last point
 // was acquired (different from the ROS timestamp). Timing of points is given in
 // the fourth component of each point relative to `Time`.
@@ -35,12 +39,15 @@ std::tuple<::infinityslam::sensor::PointCloudWithIntensities,
            ::infinityslam::common::Time>
 ToPointCloudWithIntensities(const sensor_msgs::PointCloud2& msg);
 
+::infinityslam::sensor::PointCloudXYZIT
+ToPointCloudXYZIT(const sensor_msgs::PointCloud2& msg);
+
 // 得到ROS/PC2消息覆盖时段的起始时间（按帧时间戳）。
-::infinityslam::common::Time GetPC2StartTime(
+double GetPC2StartTime(
     const sensor_msgs::PointCloud2& msg);
 
 // 得到ROS/PC2消息覆盖时段的结束时间（不一定是最后一个点）。
-::infinityslam::common::Time GetPC2EndTime(
+double GetPC2EndTime(
     const sensor_msgs::PointCloud2& msg);
 
 ::infinityslam::transform::Rigid3d ToRigid3d(

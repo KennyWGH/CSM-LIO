@@ -34,7 +34,7 @@
 #include <pcl_conversions/pcl_conversions.h>
 
 #include "infinityslam_ros/src/node_constants.h"
-#include "infinityslam_ros/src/ros_wrapper.h"
+#include "infinityslam_ros/src/csmlio_wrapper.h"
 #include "infinityslam_ros/src/ros_wrapper_options.h"
 #include "infinityslam_ros/src/ros_log_sink.h"
 #include "infinityslam_ros/src/tmp_test.h"
@@ -56,20 +56,20 @@ void Run()
     tf2_ros::Buffer tf_buffer{::ros::Duration(kTfBufferCacheTimeInSeconds)};
     tf2_ros::TransformListener tf(tf_buffer);
 
-    // LoadRosWrapperOptions(FLAGS_ros_config_file, /*logging=*/true); // TODO: debug yaml reading error.
-    RosWrapperOptions ros_wrapper_options = ReadRosWrapperOptions();
+    // LoadCSMLioWraPperOptions(FLAGS_ros_config_file, /*logging=*/true); // TODO: debug yaml reading error.
+    CSMLioWraPperOptions ros_wrapper_options = ReadCSMLioWraPperOptions();
 
-    Node node(ros_wrapper_options, &tf_buffer);
+    CSMLioWrapper csmlio_wrapper(ros_wrapper_options, &tf_buffer);
 
     LOG(INFO) << "## Report ros::NodeHandle::getNamespace(): " 
-        << node.node_handle()->getNamespace() << " .";
-    node.Start();
+        << csmlio_wrapper.node_handle()->getNamespace() << " .";
+    csmlio_wrapper.Start();
 
     ::ros::spin();
 
     // 保存必要的SLAM文件。
-    // node.FinishAllTrajectories();
-    // node.RunFinalOptimization();
+    // csmlio_wrapper.FinishAllTrajectories();
+    // csmlio_wrapper.RunFinalOptimization();
 
 }
 
@@ -90,7 +90,7 @@ int main(int argc, char** argv) {
     ::ros::start();
 
     infinityslam_ros::ScopedRosLogSink ros_log_sink;
-    // infinityslam_ros::ConvertSO3ToRPY();
+    // infinityslam_ros::TestStructureInitialization();
     infinityslam_ros::Run();
     ::ros::shutdown();
     return 0;

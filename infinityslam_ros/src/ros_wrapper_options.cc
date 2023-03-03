@@ -38,12 +38,12 @@ double imu_sampling_ratio = 1.;
 double landmarks_sampling_ratio = 1.;
 } // namespace options
 
-bool LoadRosWrapperOptions(const std::string& yaml_file, bool logging) {
+bool LoadCSMLioWraPperOptions(const std::string& yaml_file, bool logging) {
     infinityslam::io::YamlNode yaml_node_(yaml_file);
-    return LoadRosWrapperOptions(yaml_node_, logging);
+    return LoadCSMLioWraPperOptions(yaml_node_, logging);
 }
 
-bool LoadRosWrapperOptions(infinityslam::io::YamlNode& yaml_node, bool logging) {
+bool LoadCSMLioWraPperOptions(infinityslam::io::YamlNode& yaml_node, bool logging) {
     if(!yaml_node.is_valid()) {
         LOG(ERROR) << "Invalid YamlNode, failed to load ROS options.";
         return false;

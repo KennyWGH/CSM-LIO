@@ -38,9 +38,9 @@ extern double imu_sampling_ratio;
 extern double landmarks_sampling_ratio;
 } // namespace options
 
-bool LoadRosWrapperOptions(const std::string& yaml_file, bool logging = false);
+bool LoadCSMLioWraPperOptions(const std::string& yaml_file, bool logging = false);
 
-bool LoadRosWrapperOptions(infinityslam::io::YamlNode& yaml_node, bool logging = false);
+bool LoadCSMLioWraPperOptions(infinityslam::io::YamlNode& yaml_node, bool logging = false);
 
 }  // namespace infinityslam_ros
 

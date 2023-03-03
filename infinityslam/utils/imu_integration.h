@@ -1,18 +1,8 @@
-/*
+/**
+ * Copyright 2022 WANG Guanhua (wangxxx@gmail.com)
  * Copyright 2016 The Cartographer Authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * Licensed under the Apache License, Version 2.0 (the "License").
+*/
 
 #ifndef INFINITYSLAM_UTILS_INTERNAL_3D_IMU_INTEGRATION_H_
 #define INFINITYSLAM_UTILS_INTERNAL_3D_IMU_INTEGRATION_H_
@@ -26,10 +16,11 @@
 #include "infinityslam/sensor/imu_data.h"
 #include "infinityslam/transform/rigid_transform.h"
 #include "infinityslam/transform/transform.h"
+#include "infinityslam/transform/timed_pose.h"
 #include "glog/logging.h"
 
 namespace infinityslam {
-namespace csmlio {
+namespace utils {
 
 template <typename T>
 struct IntegrateImuResult {
@@ -44,7 +35,8 @@ IntegrateImuResult<T> IntegrateImu(
     const Eigen::Transform<T, 3, Eigen::Affine>&
         linear_acceleration_calibration,
     const Eigen::Transform<T, 3, Eigen::Affine>& angular_velocity_calibration,
-    const common::Time start_time, const common::Time end_time,
+    const common::Time start_time, 
+    const common::Time end_time,
     IteratorType* const it) 
 {
     CHECK_LE(start_time, end_time);
@@ -98,6 +90,114 @@ IntegrateImuResult<double> IntegrateImu(
         imu_data, Eigen::Affine3d::Identity(), 
         Eigen::Affine3d::Identity(),
         start_time, end_time, it);
+}
+
+
+// 专门用于计算旋转积分并支持对旋转积分按比例缩放的数据结构。
+template<typename T>
+struct RotationIncrement {
+    Eigen::Matrix<T, 3, 1> delta_angle;
+    Eigen::Quaternion<T> orientation;
+};
+
+// 执行按【比例】缩放旋转量
+template <typename RangeType, typename IteratorType>
+void ReScalingRotation(
+    RangeType& rotation_data, 
+    IteratorType* const it,
+    const double& scale_factor) 
+{
+    //
+}
+
+// 执行按【误差均分补偿】调整旋转量
+template <typename T, typename RangeType, typename IteratorType>
+void CompensateRotationError(
+    RangeType& rotation_data,
+    IteratorType* const it,
+    const Eigen::Quaternion<T>& rot_error) 
+{
+    //
+}
+
+/**
+ * 在上述基础上，支持输出所有imu时刻的姿态。
+ * 要求：
+ * -- start_time 小于 end_time；
+ * -- 当前迭代器指向数据时间戳小于 start_time；
+ * -- 当前迭代器位置下一个数据的时间戳大于 start_time；
+ * 
+ * TODO: 引入模板类型T for float/double etc.
+*/
+template <typename T, typename RangeType, typename IteratorType>
+bool IntegrateImuRotation(
+    const RangeType& imu_data,
+    const double& start_time,
+    const double& end_time,
+    IteratorType* const it,
+    std::vector<RotationIncrement<T>>& rotations) 
+{
+    if (start_time >= end_time) {
+        LOG(ERROR) << "start_time must be early than end_time!";
+        return false;
+    }
+    if (*it == imu_data.end()) {
+        LOG(ERROR) << "iterator must not be equal with `imu_data.end()`.";
+        return false;
+    }
+
+    // if (std::next(*it) != imu_data.end()) {
+    //     if (std::next(*it)->timestamp < start_time) {
+    //         LOG(ERROR) << "next-iterator element must be later then start_time.";
+    //         return false;
+    //     }
+    // }
+    // if (imu_data.rbegin()->timestamp < end_time) {
+    //     LOG(ERROR) << "tail element of imu_data must be later than end_time.";
+    //     return false;
+    // }
+    if ((*it)->timestamp - start_time > 0.5) {
+        LOG(WARNING) << "Beginning imu data is later than start_time for " 
+            << (*it)->timestamp - start_time << " seconds (>" << 0.5 << ")";
+    }
+
+    rotations.clear();
+    double current_time = start_time;
+    Eigen::Quaternion<T> current_rotation = Eigen::Quaternion<T>::Identity();
+    size_t counts = 0;
+    while ((*it) != imu_data.end()) {
+        const double next_time = (*it)->timestamp;
+        Eigen::Quaternion<T> next_rotation = current_rotation;
+        if (next_time > start_time) {
+            const double delta_t = next_time - current_time;
+            const Eigen::Matrix<T, 3, 1> delta_angle =
+                (*it)->angular_velocity.template cast<T>() * delta_t;
+            next_rotation = current_rotation *
+                transform::AngleAxisVectorToRotationQuaternion(delta_angle);
+            rotations.emplace_back(RotationIncrement<T>{delta_angle, next_rotation});
+            ++counts;
+            // LOG(INFO) << "integrate imu : one imu data used -- " << counts;
+        }
+        if (next_time > end_time) {
+            if (!rotations.empty()) {
+                rotations.pop_back();
+                const double delta_t = end_time - current_time;
+                const Eigen::Matrix<T, 3, 1> delta_angle =
+                    (*it)->angular_velocity.template cast<T>() * delta_t;
+                next_rotation = current_rotation *
+                    transform::AngleAxisVectorToRotationQuaternion(delta_angle);
+                rotations.emplace_back(RotationIncrement<T>{delta_angle, next_rotation});
+            }
+            break;
+        }
+        current_time = next_time;
+        current_rotation = next_rotation;
+        ++(*it);
+    }
+
+    if (rotations.size() == counts) return true;
+    LOG(ERROR) << "unexpected error occured!";
+    return false;
 }
 
 template <typename T>
@@ -166,7 +266,7 @@ ExtrapolatePoseResult<T> ExtrapolatePoseWithImu(
         time, imu_data, imu_it);
 }
 
-}  // namespace csmlio
+}  // namespace utils
 }  // namespace infinityslam
 
 #endif  // INFINITYSLAM_UTILS_INTERNAL_3D_IMU_INTEGRATION_H_

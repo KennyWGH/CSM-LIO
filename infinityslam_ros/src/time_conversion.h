@@ -15,6 +15,10 @@ namespace infinityslam_ros {
 
 ::infinityslam::common::Time FromRos(const ::ros::Time& time);
 
+::ros::Time UniversalToRos(double time);
+
+double RosToUniversal(const ::ros::Time& time);
+
 }  // namespace infinityslam_ros
 
 #endif  // ROS_APP_TIME_CONVERSION_H

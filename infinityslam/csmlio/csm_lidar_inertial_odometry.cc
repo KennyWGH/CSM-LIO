@@ -203,10 +203,10 @@ void CSMLidarInertialOdometry::ProcessSensorData(
                 matching_result->insertion_result->constant_data,
                 matching_result->insertion_result->constant_data->local_pose});
         // 单独保存关键帧位姿队列
-        timed_pose_queue_.push_back(transform::TimedPose{
+        timed_pose_queue_.push_back(transform::TimedPose(
             matching_result->insertion_result->constant_data->time, 
             common::ToSeconds(matching_result->insertion_result->constant_data->time), 
-            matching_result->insertion_result->constant_data->local_pose});
+            matching_result->insertion_result->constant_data->local_pose));
         while (timed_pose_queue_.size() > 2 &&
             timed_pose_queue_[1].time <= timed_pose_queue_.back().time - kPoseQueueDuration) 
         {

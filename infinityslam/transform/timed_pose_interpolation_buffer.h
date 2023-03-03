@@ -15,45 +15,48 @@ namespace transform {
 
 /**
  * 在 TimedPose 队列上做内插外推。
- * 注意【外推】应当是有时间限制的。
- * 我们特意用【double】类型的时间表示。
+ * 我们特意用【double】类型的时间表示，这是区别于‘TimestampedTransform’的地方。
+ * 注意【外推】应当是有时间限制的。对队列时间长度，我们鼓励把容许时长设为无限，尤其
+ * 是‘buffer’要用在离线处理场景时，要求能够对整个slam生命周期内的任意时刻进行插值。
+ * 如果您不需要在整个slam周期层面上插值，而是对近期的时刻插值 —— 比如关键帧去畸变，
+ * 推荐使用utils模块下的‘imu aided pose interpolator’，这个更精确。
 */
 class TimedPoseInterpolationBuffer {
- public:
-  TimedPoseInterpolationBuffer() = default;
+   public:
+    TimedPoseInterpolationBuffer() = default;
 
-  // 最多保存多长时间的位姿队列。
-  void SetTimeRangeLimit(double max_time_range);
+    // 最多保存多长时间的位姿队列。
+    void SetTimeRangeLimit(double max_time_range);
 
-  // 在队尾新增位姿，并在需要时移除最早的。
-  void Push(double time, const transform::TimedPose& transform);
+    // 在队尾新增位姿，并在需要时移除最早的。
+    void Push(double time, const transform::TimedPose& transform);
 
-  // 清空队列.
-  void Clear();
+    // 清空队列.
+    void Clear();
 
-  // 时间是否在队列时间范围内 —— 也即能否内插。
-  bool Has(double time) const;
+    // 时间是否在队列时间范围内 —— 也即能否内插。
+    bool Has(double time) const;
 
-  // 内插位姿。
-  transform::TimedPose Lookup(double time) const;
+    // 内插位姿。
+    transform::TimedPose Lookup(double time) const;
 
-  double earliest_time() const;
-  double latest_time() const;
+    double earliest_time() const;
+    double latest_time() const;
 
-  bool empty() const;
+    bool empty() const;
 
-  double time_range_limit() const;
-  double time_range() const;
+    double time_range_limit() const;
+    double time_range() const;
 
-  size_t size() const;
+    size_t size() const;
 
-  
+    
 
- private:
-  void RemoveOldPosesIfNeeded();
+   private:
+    void RemoveOldPosesIfNeeded();
 
-  std::deque<TimedPose> timed_pose_cache_;
-  double time_range_limit_ = 10.;
+    std::deque<TimedPose> timed_pose_cache_;
+    double time_range_limit_ = 10.;
 };
 
 

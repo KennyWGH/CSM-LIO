@@ -46,7 +46,23 @@ class optional {
     }
 
     bool operator==(const TValueType& rvalue) const {
+        if (!hasvalue_) return false;
         return data_ == rvalue;
+    }
+
+    bool operator>=(const TValueType& rvalue) const {
+        if (!hasvalue_) return false;
+        return data_ >= rvalue;
+    }
+
+    bool operator>(const TValueType& rvalue) const {
+        if (!hasvalue_) return false;
+        return data_ > rvalue;
+    }
+
+    bool operator<(const TValueType& rvalue) const {
+        if (!hasvalue_) return false;
+        return data_ < rvalue;
     }
 
     TValueType operator+(const TValueType& rvalue) const {
